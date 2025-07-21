@@ -6,8 +6,7 @@ import {vapi} from "@/lib/vapi.sdk";
 import Image from "next/image";
 import Lottie, {LottieRefCurrentProps} from "lottie-react";
 import soundwaves from '@/constants/soundwaves.json'
-
-
+import { addToSessionHistory } from '@/lib/actions/companion.actions';
 
 enum CallStatus{
     INACTIVE = 'INACTIVE',
@@ -21,6 +20,7 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
         const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
         const [isSpeaking, setIsSpeaking] = useState(false);
         const [isMuted, setIsMuted] = useState(false)
+        const [messages, setMessages] = useState<SavedMessage[]>([]);
 
         const lottieRef = useRef<LottieRefCurrentProps>(null);
 
@@ -37,9 +37,17 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
         useEffect(() => {
             const onCallStart = () => setCallStatus(CallStatus.ACTIVE);
 
-            const onCallEnd = () => setCallStatus(CallStatus.FINISHED);       
+            const onCallEnd = () => {
+                setCallStatus(CallStatus.FINISHED);
+                addToSessionHistory(companionId)
+            }       
             
-            const onMessage = () => {}
+            const onMessage = (message : Message) => {
+                if(message.type === 'transcript' && message.transcriptType === 'final'){
+                    const newMessage =  {role: message.role, content: message.transcript}
+                    setMessages((prev) => [newMessage, ...prev])
+                }
+            }
 
             const onSpeechStart = () => setIsSpeaking(true)
 
@@ -77,8 +85,8 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
             variableValues: {
                 subject, topic, style
             },
-            clientMessages: 'transcript' as const,
-            serverMessages: undefined,
+            clientMessages: ["transcript"],
+            serverMessages: [],
         }
 
         vapi.start(configureAssistant(voice,style), assistantOverrides)
@@ -90,21 +98,20 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
     }
 
     return (
-        <section className='flex flex-col h-[70vh]'>
-            <section className='flex gap-8 max-sm:flex-col'>
-                <div className='companion-section'>
-                    <div className='companion-avatar' style={{
-                        backgroundColor: getSubjectColor(subject)}}>
-                        <div className={cn(
-                            'absolute transition-opacity duration-1000',
-                            callStatus === CallStatus.FINISHED || callStatus === CallStatus.INACTIVE ?
-                            'opacity-1001' : 'opacity-0', callStatus === CallStatus.CONNECTING && 'opacity-100 animate-pulse'
-                        )
-                    }>
-                            <Image src={`/icons/${subject}.svg`} alt={subject} width={150} height={150}
-                            className="max-sm:w-fit" ></Image>
+        <section className="flex flex-col h-full">
+            <section className="flex gap-8 max-sm:flex-col">
+                <div className="companion-section">
+                    <div className="companion-avatar" style={{ backgroundColor: getSubjectColor(subject)}}>
+                        <div
+                            className={
+                            cn(
+                                'absolute transition-opacity duration-1000', callStatus === CallStatus.FINISHED || callStatus === CallStatus.INACTIVE ? 'opacity-1001' : 'opacity-0', callStatus === CallStatus.CONNECTING && 'opacity-100 animate-pulse'
+                            )
+                        }>
+                            <Image src={`/icons/${subject}.svg`} alt={subject} width={150} height={150} className="max-sm:w-fit" />
                         </div>
-                        <div className={cn('absolute transition-opacity duration-1000', callStatus=== CallStatus.ACTIVE ? 'opacity-100' : 'opacity-0')}>
+
+                        <div className={cn('absolute transition-opacity duration-1000', callStatus === CallStatus.ACTIVE ? 'opacity-100': 'opacity-0')}>
                             <Lottie
                                 lottieRef={lottieRef}
                                 animationData={soundwaves}
@@ -124,7 +131,7 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
                     <button className='btn-mic' onClick={toggleMicrophone} disabled={callStatus !== CallStatus.ACTIVE}>
                         <Image src={isMuted ? '/icons/mic-off.svg' :
                             '/icons/mic-on.svg'} alt='mic' width={36} height={36}/>
-                            <p className='max-sm;hidden'>
+                            <p className='max-sm:hidden'>
                                 {isMuted ? 'Turn on microphone' : 'Turn off microphone'}
                             </p>
                     </button>
@@ -142,10 +149,28 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
             </section>
 
             <section className='transcript'>
-                <div className='transcript-message no-scrollbar'>Messages</div>
+                <div className='transcript-message no-scrollbar'>
+                    {messages.map((message, index) => {
+                    if(message.role === 'assistant') {
+                        return(
+                            <p key={index} className='max-sm:text-sm'>
+                            {
+                                name
+                                .split(' ')[0]
+                                .replace('/[.,]/g, ','')
+                            }: {message.content}
+                            </p>
+                        )
+                    } else {
+                        return <p key={index} className='text-primary max-sm:text-sm'>
+                            {userName} : {message.content}
+                            </p>
+                    }
+                })}
+                </div>
+
                 <div className='transcript-fade'></div>
             </section>
-
         </section>
     )
 }
