@@ -81,3 +81,10 @@ interface CompanionComponentProps {
   voice: string;
   style: string;
 }
+
+interface Bookmark {
+  id: string;
+  userId: string;  // References your User table
+  companionId: string;  // References your Companion table
+  createdAt: string;
+}

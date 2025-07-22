@@ -19,21 +19,21 @@ interface CompanionListProps {
 }
 
 const CompanionsList = ({ title, companions, classNames }: CompanionListProps) => {
-    function getSubjectColor(subject: string): string {
+    //function getSubjectColor(subject: string): string {
         // Map subjects to specific background colors
-        const subjectColors: Record<string, string> = {
-            math: "#FDE68A",
-            science: "#A7F3D0",
-            english: "#BFDBFE",
-            history: "#FCA5A5",
-            art: "#FBCFE8",
-            music: "#DDD6FE",
-            geography: "#FDBA74",
+        //const subjectColors: Record<string, string> = {
+            //math: "#FDE68A",
+            //science: "#A7F3D0",
+            //english: "#BFDBFE",
+            //history: "#FCA5A5",
+            //art: "#FBCFE8",
+            //music: "#DDD6FE",
+            //geography: "#FDBA74",
             // Add more subjects as needed
-        };
+        //};
         // Default color if subject not found
-        return subjectColors[subject.toLowerCase()] || "#E5E7EB";
-    }
+        //return subjectColors[subject.toLowerCase()] || "#E5E7EB";
+    //}
 
     return (
         <article className={cn('companion-list', classNames)}>
