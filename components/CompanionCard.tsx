@@ -1,4 +1,6 @@
 "use client";
+
+import { deleteCompanion } from "@/lib/actions/companion.actions";
 import { removeBookmark } from "@/lib/actions/companion.actions";
 import { addBookmark } from "@/lib/actions/companion.actions";
 import Image from "next/image";
@@ -32,8 +34,21 @@ interface CompanionCardProps {
         } else {
             await addBookmark(id, pathname);
         }
-
     };
+
+    const handleDelete = async () => {
+    const confirmDelete = confirm("Are you sure you want to delete this companion?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteCompanion(id, pathname);
+      alert("Companion deleted successfully.");
+    } catch (error) {
+      console.error("Delete failed:", error);
+      alert("Failed to delete companion.");
+    }
+  };
+
     return (
         <article className="companion-card" style={{ backgroundColor: color }}>
         <div className="flex justify-between items-center">
@@ -70,6 +85,12 @@ interface CompanionCardProps {
             Launch Lesson
             </button>
         </Link>
+        <button
+        className="text-red-500 hover:underline mt-2 text-sm"
+        onClick={handleDelete}        //Delete Button (admin or owner use only)      
+        >
+            Delete Companion  
+        </button>
         </article>
     );
 };

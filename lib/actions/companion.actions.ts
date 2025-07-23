@@ -75,8 +75,6 @@ export const getCompanion = async (id: string) => {
     return data[0];
 };
 
-
-
 export const addToSessionHistory = async (companionId: string) => {
     const { userId } = await auth();
     const supabase = createSupabaseClient();
@@ -188,6 +186,25 @@ export const addBookmark = async (companionId: string, path: string) => {
     revalidatePath(path);
     return data;
     };
+
+    export const deleteCompanion = async (id: string, path?: string) => {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
+    const supabase = createSupabaseClient();
+
+    // Delete the companion
+    const { error: deleteError } = await supabase
+        .from("companions")
+        .delete()
+        .eq("id", id);
+
+    if (deleteError) throw new Error(deleteError.message);
+
+    if (path) revalidatePath(path);
+
+    return { success: true };
+};
 
     // It's almost the same as getUserCompanions, but it's for the bookmarked companions
     export const getBookmarkedCompanions = async (userId: string) => {
