@@ -86,11 +86,10 @@ interface CompanionCardProps {
             </button>
         </Link>
         <button
-            type="button"
-            className=" btn-secondary w-full justify-center mt-2"
-            onClick={handleDelete}
+        className="text-red-500 hover:underline mt-2 text-sm"
+        onClick={handleDelete}        //Delete Button (admin or owner use only)      
         >
-            Delete Companion
+            Delete Companion  
         </button>
         </article>
     );

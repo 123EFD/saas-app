@@ -165,6 +165,9 @@ export const addBookmark = async (companionId: string, path: string) => {
     };
 
     export const deleteCompanion = async (id: string, path?: string) => {
+    const { userId } = await auth();
+    if (!userId) throw new Error("Unauthorized");
+
     const supabase = createSupabaseClient();
 
     // Delete the companion
