@@ -128,27 +128,7 @@ export const getUserCompanions = async (userId: string) => {
     return data;
 };
 
-export const newCompanionPermissions = async () => {
-    const { userId, has } = await auth();
-    const supabase = createSupabaseClient();
 
-    let limit = 20;
-
-    if(has({ plan: 'basic'})) {
-        return true;
-    } else if(has({ feature: "30_companion_limit" })) {
-        limit = 30;
-    }
-
-    const { count, error } = await supabase
-        .from("companions")
-        .select("*", { count: "exact", head: true })
-        .eq("author", userId);
-
-    if (error) throw new Error(error.message);
-
-    return (count || 0) < limit;
-};
 
 // Bookmarks
 export const addBookmark = async (companionId: string, path: string) => {
