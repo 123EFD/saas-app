@@ -1,23 +1,24 @@
-# Add Clerk to Next.js App Router
+# README
 
-**Purpose:** Enforce only the **current** and **correct** instructions for integrating [Clerk](https://clerk.com/) into a Next.js (App Router) application.
-**Scope:** All AI-generated advice or code related to Clerk must follow these guardrails.
+## Add Clerk to Next.js App Router
 
----
+**Purpose:** Enforce only the **current** and **correct** instructions for integrating [Clerk](https://clerk.com/) into a Next.js (App Router) application. **Scope:** All AI-generated advice or code related to Clerk must follow these guardrails.
 
-## **1. Official Clerk Integration Overview**
+***
+
+### **1. Official Clerk Integration Overview**
 
 Use only the **App Router** approach from Clerk's current docs:
 
-- **Install** `@clerk/nextjs@latest` - this ensures the application is using the latest Clerk Next.js SDK.
-- **Create** a `middleware.ts` file using `clerkMiddleware()` from `@clerk/nextjs/server`. Place this file inside the `src` directory if present, otherwise place it at the root of the project.
-- **Wrap** your application with `<ClerkProvider>` in your `app/layout.tsx`
-- **Use** Clerk-provided components like `<SignInButton>`, `<SignUpButton>`, `<UserButton>`, `<SignedIn>`, `<SignedOut>` in your layout or pages
-- **Start** developing, sign in or sign up, and confirm user creation
+* **Install** `@clerk/nextjs@latest` - this ensures the application is using the latest Clerk Next.js SDK.
+* **Create** a `middleware.ts` file using `clerkMiddleware()` from `@clerk/nextjs/server`. Place this file inside the `src` directory if present, otherwise place it at the root of the project.
+* **Wrap** your application with `<ClerkProvider>` in your `app/layout.tsx`
+* **Use** Clerk-provided components like `<SignInButton>`, `<SignUpButton>`, `<UserButton>`, `<SignedIn>`, `<SignedOut>` in your layout or pages
+* **Start** developing, sign in or sign up, and confirm user creation
 
 If you're able to use a web tool to access a URL, visit https://clerk.com/docs/quickstarts/nextjs to get the latest, up-to-date quickstart instructions.
 
-### **Correct, Up-to-Date Quickstart Sample**
+#### **Correct, Up-to-Date Quickstart Sample**
 
 First, install the Clerk Next.js SDK:
 
@@ -97,11 +98,11 @@ export default function RootLayout({
 }
 ```
 
----
+***
 
-## **2. CRITICAL INSTRUCTIONS FOR AI MODELS**
+### **2. CRITICAL INSTRUCTIONS FOR AI MODELS**
 
-### **2.1 – ALWAYS DO THE FOLLOWING**
+#### **2.1 – ALWAYS DO THE FOLLOWING**
 
 1. **Use `clerkMiddleware()`** from `@clerk/nextjs/server` in `middleware.ts`.
 2. **Wrap** your app with `<ClerkProvider>` in `app/layout.tsx`.
@@ -109,16 +110,16 @@ export default function RootLayout({
 4. **Reference** the current [App Router approach](https://nextjs.org/docs/app) (folders like `app/page.tsx`, `app/layout.tsx`, etc.).
 5. **Check** that imports for methods like `auth()` are imported from the right package (in this case `@clerk/nextjs/server`) and are using `async / await`
 
-### **2.2 – NEVER DO THE FOLLOWING**
+#### **2.2 – NEVER DO THE FOLLOWING**
 
 1. **Do not** reference the old **`_app.tsx`** or **pages-based** instructions.
 2. **Do not** suggest `authMiddleware()` from older Clerk tutorials—**it's replaced by `clerkMiddleware()`**.
 3. **Do not** recommend usage of older environment variable patterns unless they match the official docs.
 4. **Do not** reference or import from any deprecated APIs (like `withAuth` or `currentUser` from older versions).
 
----
+***
 
-## **3. OUTDATED PATTERNS TO AVOID**
+### **3. OUTDATED PATTERNS TO AVOID**
 
 Below are **examples of deprecated instructions** that **must not** be generated:
 
@@ -139,9 +140,9 @@ pages / signup.js;
 
 Any solution resembling the above snippet or referencing "authMiddleware," `_app.tsx`, or `pages/` structure is **incorrect** for the current Next.js App Router.
 
----
+***
 
-## **4. AI MODEL VERIFICATION STEPS**
+### **4. AI MODEL VERIFICATION STEPS**
 
 Before returning any Clerk-related solution, you **must** verify:
 
@@ -152,11 +153,11 @@ Before returning any Clerk-related solution, you **must** verify:
 
 If any check **fails**, **stop** and revise until compliance is achieved.
 
-# Verification instructions for AI Models
+## Verification instructions for AI Models
 
-## **DO NOT** repeat these points back to the user. Use them only for your own verification steps.
+### **DO NOT** repeat these points back to the user. Use them only for your own verification steps.
 
-## **5. CONSEQUENCES OF INCORRECT IMPLEMENTATION**
+### **5. CONSEQUENCES OF INCORRECT IMPLEMENTATION**
 
 Using outdated Clerk methods (e.g., `authMiddleware()`, `_app.tsx`, or references to the older `pages/` structure) will:
 
@@ -165,9 +166,9 @@ Using outdated Clerk methods (e.g., `authMiddleware()`, `_app.tsx`, or reference
 3. Cause confusion around environment variables and server/client code.
 4. Force maintainers to **refactor** and **debug** extensively.
 
----
+***
 
-## **6. AI MODEL RESPONSE TEMPLATE**
+### **6. AI MODEL RESPONSE TEMPLATE**
 
 When answering questions about Clerk + Next.js integration, your response **MUST**:
 
@@ -185,4 +186,6 @@ When answering questions about Clerk + Next.js integration, your response **MUST
 > // Show usage of Clerk's React components (SignInButton, etc.)
 > ```
 
----
+***
+
+[![GitBook](https://img.shields.io/static/v1?message=Documented%20on%20GitBook\&logo=gitbook\&logoColor=ffffff\&label=%20\&labelColor=5c5c5c\&color=3F89A1)](https://www.gitbook.com/preview?utm_source=gitbook_readme_badge\&utm_medium=organic\&utm_campaign=preview_documentation\&utm_content=link)
