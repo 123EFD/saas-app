@@ -53,7 +53,11 @@ interface CompanionCardProps {
         <article className="companion-card" style={{ backgroundColor: color }}>
         <div className="flex justify-between items-center">
             <div className="subject-badge">{subject}</div>
-            <button className="companion-bookmark" onClick={handleBookmark}>
+            <button
+                className="companion-bookmark"
+                onClick={handleBookmark}
+                aria-label={bookmarked ? "Remove bookmark" : "Add bookmark"}
+            >
             <Image
                 src={
               bookmarked
@@ -67,8 +71,8 @@ interface CompanionCardProps {
             </button>
         </div>
 
-        <h2 className="text-2xl font-bold">{name}</h2>
-        <p className="text-sm">{topic}</p>
+        <h2 className="text-2xl font-bold text-foreground">{name}</h2>
+        <p className="text-sm text-foreground/80">{topic}</p>
 
         <div className="flex items-center gap-2">
             <Image
@@ -77,7 +81,7 @@ interface CompanionCardProps {
                 width={13.5}
                 height={13.5}
             />
-            <p className="text-sm">{duration} minutes</p>
+            <p className="text-sm text-foreground/80">{duration} minutes</p>
         </div>
 
         <Link href={`/companions/${id}`} className="w-full">
@@ -86,7 +90,7 @@ interface CompanionCardProps {
             </button>
         </Link>
         <button
-            className="btn-secondary w-full justify-center mt-2 py-2 rounded-lg border border-red-400 bg-gradient-to-r from-red-500 via-pink-500 to-red-400 text-white font-semibold shadow-lg hover:scale-105 hover:bg-gradient-to-l transition-all duration-200 flex items-center gap-2"
+            className="w-full justify-center mt-2 py-2 rounded-lg border border-red-400 bg-gradient-to-r from-red-500 via-pink-500 to-red-400 text-white font-semibold shadow-lg hover:scale-105 hover:bg-gradient-to-l transition-all duration-200 flex items-center gap-2"
             onClick={handleDelete}
         >
             Delete Companion
