@@ -15,9 +15,9 @@ interface CompanionCardProps {
     duration: number;
     color: string;
     bookmarked: boolean;
-    }
+}
 
-    const CompanionCard = ({
+const CompanionCard = ({
     id,
     name,
     topic,
@@ -25,8 +25,28 @@ interface CompanionCardProps {
     duration,
     color,
     bookmarked,
-    }: CompanionCardProps) => {
+}: CompanionCardProps) => {
     const pathname = usePathname();
+
+    // Function to determine if a color is dark or light
+    const isDarkColor = (color: string) => {
+        // If color is in hex format
+        if (color.startsWith('#') && color.length === 7) {
+            const hex = color.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            // Calculate brightness using the formula: (R*299 + G*587 + B*114) / 1000
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            return brightness < 128;
+        }
+        // Default to true for other color formats (assume dark)
+        return true;
+    };
+
+    const isDarkBackground = isDarkColor(color);
+    const textColorClass = isDarkBackground ? 'text-white' : 'text-gray-900';
+    const textMutedClass = isDarkBackground ? 'text-gray-200' : 'text-gray-700';
 
     const handleBookmark = async () => {
         if (bookmarked) {
@@ -52,7 +72,7 @@ interface CompanionCardProps {
     return (
         <article className="companion-card" style={{ backgroundColor: color }}>
         <div className="flex justify-between items-center">
-            <div className="subject-badge">{subject}</div>
+            <div className={`subject-badge ${textColorClass}`} style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}>{subject}</div>
             <button
                 className="companion-bookmark bg-background/30 backdrop-blur-sm"
                 onClick={handleBookmark}
@@ -71,8 +91,8 @@ interface CompanionCardProps {
             </button>
         </div>
 
-        <h2 className="text-2xl font-bold text-foreground">{name}</h2>
-        <p className="text-sm text-foreground/80">{topic}</p>
+        <h2 className={`text-2xl font-bold ${textColorClass}`}>{name}</h2>
+        <p className={`text-sm ${textMutedClass}`}>{topic}</p>
 
         <div className="flex items-center gap-2">
             <Image
@@ -81,11 +101,11 @@ interface CompanionCardProps {
                 width={13.5}
                 height={13.5}
             />
-            <p className="text-sm text-foreground/80">{duration} minutes</p>
+            <p className={`text-sm ${textMutedClass}`}>{duration} minutes</p>
         </div>
 
         <Link href={`/companions/${id}`} className="w-full">
-            <button className="btn-primary w-full justify-center">
+            <button className={`btn-primary w-full justify-center ${isDarkBackground ? 'bg-white text-gray-900' : 'bg-gray-900 text-white'}`}>
             Launch Lesson
             </button>
         </Link>
