@@ -54,7 +54,7 @@ interface CompanionCardProps {
         <div className="flex justify-between items-center">
             <div className="subject-badge">{subject}</div>
             <button
-                className="companion-bookmark"
+                className="companion-bookmark bg-background/30 backdrop-blur-sm"
                 onClick={handleBookmark}
                 aria-label={bookmarked ? "Remove bookmark" : "Add bookmark"}
             >

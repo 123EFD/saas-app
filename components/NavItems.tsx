@@ -1,29 +1,40 @@
 'use client';
-import React from 'react'
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 
 const navItems = [
     {label: 'Home', href: "/"},
     {label: 'Companions', href: "/companions"},
     {label: 'My journey', href: "/my-journey"},
 ]
+
 const NavItems = () => {
     const pathname = usePathname();
+    const [loadingHref, setLoadingHref] = useState<string | null>(null);
+
+    const handleClick = (href: string) => {
+        setLoadingHref(href);
+        // Reset loading state after 2 seconds (simulating navigation)
+        setTimeout(() => setLoadingHref(null), 2000);
+    };
+
     return (
-        
-    <nav className="flex items-center gap-4">
-        {navItems.map(({ label, href}) =>(
-            <Link
-                href={href}
-                key={label}
-className={`${pathname === href ? 'text-primary font-semibold' : ''}`}
+        <nav className="flex items-center gap-4">
+            {navItems.map(({ label, href}) =>(
+                <Link
+                    href={href}
+                    key={label}
+                    className={`${pathname === href ? 'text-primary font-semibold' : ''} flex items-center gap-2`}
+                    onClick={() => handleClick(href)}
                 >
-                {label}
-            </Link>
-        ))}
-    </nav>
-  )
+                    {label}
+                    {loadingHref === href && <Loader2 className="h-4 w-4 animate-spin" />}
+                </Link>
+            ))}
+        </nav>
+    )
 }
 
 export default NavItems
