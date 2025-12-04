@@ -188,4 +188,229 @@ When answering questions about Clerk + Next.js integration, your response **MUST
 
 ***
 
-[![GitBook](https://img.shields.io/static/v1?message=Documented%20on%20GitBook\&logo=gitbook\&logoColor=ffffff\&label=%20\&labelColor=5c5c5c\&color=3F89A1)](https://www.gitbook.com/preview?utm_source=gitbook_readme_badge\&utm_medium=organic\&utm_campaign=preview_documentation\&utm_content=link)
+# SaaS App Project Structure
+
+This document provides a comprehensive overview of the project structure for the [saas-app](https://github.com/123EFD/saas-app) repository.  
+It's designed to help future maintainers and contributors understand the function of each major file and directory in this real-time AI teaching platform SaaS.
+
+---
+
+## Project File Tree Overview
+
+```
+/
+├── app/
+│   ├── api/
+│   ├── companions/
+│   ├── my-journey/
+│   ├── sentry-example-page/
+│   ├── sign-in/
+│   ├── subscription/
+│   ├── globals.css
+│   ├── global-error.tsx
+│   ├── layout.tsx
+│   ├── page.tsx
+├── components/
+│   ├── ui/
+│   ├── CompanionCard.tsx
+│   ├── CompanionsList.tsx
+│   ├── CompanionComponent.tsx
+│   ├── CompanionForm.tsx
+│   ├── CTA.tsx
+│   ├── Navbar.tsx
+│   ├── NavItems.tsx
+│   ├── SearchInput.tsx
+│   ├── SubjectFilter.tsx
+│   ├── ThemeProvider.tsx
+│   ├── ThemeToggle.tsx
+├── constants/
+│   ├── index.ts
+│   ├── soundwaves.json
+├── lib/
+│   ├── actions/
+│   │   ├── companion.actions.ts
+│   ├── supabase.ts
+│   ├── utils.ts
+│   ├── vapi.sdk.ts
+├── types/
+│   ├── index.d.ts
+│   ├── vapi.d.ts
+├── .idea/
+├── public/
+├── eslint.config.mjs
+├── components.json
+├── instrumentation.ts
+├── instrumentation-client.ts
+├── middleware.ts
+├── next.config.ts
+├── package.json
+├── package-lock.json
+├── postcss.config.mjs
+```
+
+---
+
+## app/
+
+Main entry for routing, pages, and global application configuration.
+
+- **globals.css**  
+  Global stylesheet. Includes Tailwind, theme tokens, custom utility classes, and component styling.
+
+- **global-error.tsx**  
+  Client-side error boundary for uncaught exceptions, with Sentry integration.
+
+- **layout.tsx**  
+  Project-wide root layout: wraps pages with the navigation bar, theme provider, and Clerk authentication provider.
+
+- **page.tsx**  
+  Home page. Lists popular companions and recent session companions.
+
+### app/api/
+
+Handles backend API endpoints (e.g., sentry-example-api for error/demo).
+
+### app/companions/
+
+Contains pages for displaying, creating, and interacting with AI companions.
+
+- **[id]/page.tsx**  
+  Dynamic route for a specific companion's lesson/session page. Loads companion data and session.
+
+- **new/page.tsx**  
+  Allows users to create a new companion via a form.
+
+- **page.tsx**  
+  Library/list view of all companions. Supports filtering and searching.
+
+### app/my-journey/
+
+Profile page for the current user. Shows completed lessons, created/bookmarked companions, using an accordion layout.
+
+### app/sign-in/
+
+Handles the sign-in flow using Clerk authentication.
+
+### app/subscription/
+
+Renders pricing/subscription via Clerk's PricingTable component.
+
+### app/sentry-example-page/
+
+Demo/testing page for Sentry error monitoring/diagnostics.
+
+---
+
+## components/
+
+Reusable React components for the application UI and layout.
+
+### components/ui/
+
+Atomic and compound UI elements, designed with Radix UI and Tailwind.
+
+- **accordion.tsx**: Custom Accordion with Radix UI primitives.
+- **button.tsx**: Configurable Button component with variant and size props.
+- **form.tsx**: Fragmented form components supporting react-hook-form and field validation.
+- **input.tsx**: Style-enhanced input field for forms.
+- **label.tsx**: Label for form inputs with error support.
+- **select.tsx**: Select dropdown (Radix UI) for subjects/style/voice, with advanced options and icons.
+- **table.tsx**: Table component and subcomponents (row, header, cell) for displaying companion lists.
+- **textarea.tsx**: Styled textarea input.
+
+### Other Components
+
+- **CompanionCard.tsx**: Displays a single companion's info, bookmark state, launch/delete actions.
+- **CompanionComponent.tsx**: Main session component, integrating real-time voice and transcript interaction with Vapi SDK.
+- **CompanionForm.tsx**: Form UI/controller to build a new companion (with validation).
+- **CompanionsList.tsx**: Tabular display of companions (bookmarked, user, or recent).
+- **CTA.tsx**: "Call to Action" section—invites users to create a new learning companion.
+- **Navbar.tsx**: Top navigation with authentication and theme toggle.
+- **NavItems.tsx**: Actual navigation links for routing (Home, Companions, My Journey).
+- **SearchInput.tsx**: Search bar for filtering companions.
+- **SubjectFilter.tsx**: Dropdown for filtering companions by subject.
+- **ThemeProvider.tsx**: Context and logic for dark/light mode.
+- **ThemeToggle.tsx**: Button to toggle between dark/light theme.
+
+---
+
+## constants/
+
+Application-wide constants, configuration, and static data.
+
+- **index.ts**: Subjects, subject colors, available voices, recent sessions.
+- **soundwaves.json**: Lottie animation data for voice session feedback.
+
+---
+
+## lib/
+
+Application core logic utilities and API integration.
+
+### actions/
+
+- **companion.actions.ts**  
+  API logic for CRUD/queries (create, list, bookmark, delete companions), session management with Supabase, authentication, and more.
+
+### Other Utilities
+
+- **supabase.ts**: Factory for Supabase client with Clerk authentication.
+- **utils.ts**: Utility functions (classnames, subject color mapping, assistant config for Vapi).
+- **vapi.sdk.ts**: Vapi SDK instance initialization for voice AI sessions.
+
+---
+
+## types/
+
+TypeScript type definitions.
+
+- **index.d.ts**: User, Companion, Session, Bookmark, etc. types and interfaces.
+- **vapi.d.ts**: Types for Vapi voice interaction/message events.
+
+---
+
+## .idea/
+
+IDE (JetBrains) configuration, not related to the application runtime.
+
+---
+
+## public/
+
+Static files (images, icons, etc.).  
+This is auto-served at the root of the site (e.g., `/logo.svg`).
+
+---
+
+## Root Configuration and Tooling
+
+- **eslint.config.mjs**: ESLint rules for code style.
+- **components.json**: UI library generation/configuration (shadcn/ui config).
+- **instrumentation.ts / instrumentation-client.ts**: Sentry error/reporting setup (for Node and browser).
+- **middleware.ts**: Next.js middleware handling Clerk authentication, API route matching, etc.
+- **next.config.ts**: Next.js build and deployment config (Sentry, images, TypeScript, eslint).
+- **package.json / package-lock.json**: NPM project config, dependencies, and lock file.
+- **postcss.config.mjs**: PostCSS/Tailwind CSS build configuration.
+
+---
+
+## How to Extend or Contribute
+
+- Start with UI elements in `components/ui/` for atomic design and layout.
+- Business logic for companions and sessions lives in `lib/actions/`.
+- Add new global styles to `app/globals.css`.
+- Types should be added in `types/` for maintainability.
+- Authentication flows and layout are managed in `app/layout.tsx` and the `ClerkProvider`.
+
+---
+
+## Notes
+
+- This project is primarily written in **TypeScript** (~92%), with some CSS (Tailwind, ~7.5%) and a small amount of JavaScript.
+- Follows React, Next.js App Router, Clerk authentication, and Supabase for backend.
+- Error monitoring is provided using Sentry.
+- Real-time, voice-enabled learning sessions use Vapi SDK.
+
+---
+
+_Last updated: 2025-12-04_
