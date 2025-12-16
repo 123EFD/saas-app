@@ -1,0 +1,1 @@
+//Individual note view (optional)

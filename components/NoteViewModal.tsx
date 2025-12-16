@@ -1,0 +1,1 @@
+//Full note view with edit

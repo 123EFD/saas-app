@@ -5,6 +5,8 @@
 //   accountId: string;
 // };
 
+
+//Updated with Note types
 enum Subject {
   maths = "maths",
   language = "language",
