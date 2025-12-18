@@ -1,41 +1,46 @@
 "use client";
+
 import { createNote, getNotes } from "@/lib/actions/note.actions";
 import { auth } from "@clerk/nextjs/server";
 import { useState } from "react";
 import { Note } from "@/types";
 
 
-export default async function TestConnectionPage() {
-    const [notes,setNotes]=  useState<Note[]>([]); //anarray of notes
-    const [loading, setLoading] = useState(false);
+export default function TestConnectionPage() {
+    const [logs, setLogs] = useState<string>("Ready to test...");
+    const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+
 
     const handleFetch = async () => {
-        setLoading(true);
+        setStatus("loading");
+        setLogs("Fetching notes...");
         try {
             const data = await getNotes();
-            setNotes(data);
-        } catch (error) {
-            console.error("Error fetching notes:", error);
+            setLogs(JSON.stringify(data, null, 2));
+            setStatus("success");
+        } catch (error:any) {
+            setLogs(`Error: ${error.message}`);
             alert("Failed to fetch notes. Check console for details.");
         }
-        setLoading(false);
+        setStatus("error");
     };
 
     const handleCreate = async () => {
-        setLoading(true);
+        setStatus("loading");
+        setLogs("Fetching notes...");
         try {
-            await createNote({
+            const newNote = await createNote({
                 title: "Test Note via Frontend",
                 content: "This proves the connection works!",
                 subject: "Integration Test"
             });
-            alert("Note created successfully!");
-            handleFetch(); // Refresh notes
-        } catch (error) {
-            console.error("Error creating note:", error);
+            setLogs(`Created:\n${JSON.stringify(newNote, null, 2)}`);
+            setStatus("success");
+        } catch (error:any) {
+            setLogs(`Error: ${error.message}`);
             alert("Failed to create note. Check console for details.");
         }
-        setLoading(false);
+        setStatus("error");
     };
 
     return (
@@ -45,38 +50,29 @@ export default async function TestConnectionPage() {
         <div className="flex gap-4">
             <button 
             onClick={handleFetch}
-            disabled={loading}
+            disabled={status === "loading"}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
             >
-            {loading ? "Loading..." : "Fetch All Notes"}
+            {status === "loading" ? "Wo..." : "Fetch All Notes"}
             </button>
 
             <button 
             onClick={handleCreate}
-            disabled={loading}
+            disabled={status === "loading"}
             className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
             >
             Create Test Note
             </button>
         </div>
 
-        <div className="border p-4 rounded bg-gray-50 min-h-[200px]">
-            <h2 className="font-semibold mb-2">Results:</h2>
-            
-            {notes.length === 0 ? (
-                <p className="text-gray-500">No notes fetched yet.</p>
-            ) : (
-            <ul className="space-y-2">
-                {/* TypeScript now knows 'note' has an .id and .title */}
-                {notes.map((note) => (
-                <li key={note.id} className="p-3 bg-white border rounded shadow-sm">
-                    <span className="font-bold text-blue-600">[{note.subject}]</span> {note.title}
-                    <div className="text-xs text-gray-400 mt-1">ID: {note.id}</div>
-                </li>
-                ))}
-            </ul>
-            )}
-        </div>
+        <div className="space-y-2">
+            <h2 className="text-xl font-semibold">Result Log:</h2>
+            <div className={`p-4 rounded-lg overflow-auto max-h-[500px] text-sm font-mono border ${
+                status === "error" ? "bg-red-50 border-red-200 text-red-800" : "bg-black text-green-400 border-gray-800"
+            }`}>
+                    <pre>{logs}</pre>
+                </div>
+            </div>
         </div>
     );
 }

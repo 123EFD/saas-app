@@ -25,7 +25,7 @@ export const createNote = async (data: {
   const { request, userId } = await createXanoClient();
 
   // We inject userId here securely
-  const newNote = await request<Note>("/study_note",{
+  const newNote = await request<Note>("/create_study_note",{
     method: "POST",
     body: JSON.stringify({
         user_id: userId, 
@@ -54,7 +54,7 @@ export const getNotes = async (filters?: {
   if (filters?.search) params.append("search", filters.search);
   if (filters?.bookmarked !== undefined) params.append("bookmarked", String(filters.bookmarked));
 
-  const notes = await request<Note[]>(`/study_note?${params.toString()}`, {
+  const notes = await request<Note[]>(`/get_study_notes?${params.toString()}`, {
     method: "GET",
   });
   return notes;

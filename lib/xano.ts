@@ -48,6 +48,10 @@ export async function createXanoClient() {
             headers["x-clerk-user-id"] = userId as string;
         }
 
+        console.log("--------------------------------");
+        console.log("🔍 DEBUG FETCHING URL:", url);
+        console.log("--------------------------------");
+
         //network request
         const res = await fetch(url, {
             ...init,//pass GET POST, body etc.
