@@ -13,17 +13,7 @@ toggleBookmark(noteId)
 
 import { createXanoClient } from "@/lib/xano";
 import { revalidatePath } from "next/cache";
-
-// --- Types based on your Xano Schema ---
-export interface Note {
-  id: number;
-  user_id: string;
-  title: string;
-  content: string;
-  subject: string;
-  bookmarked: boolean;
-  created_at: number;
-}
+import { Note, CreateNoteParams, GetNotesParams } from "@/types";
 
 // 1. CREATE Note
 export const createNote = async (data: {
