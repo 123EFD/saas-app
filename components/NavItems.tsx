@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { Label } from '@radix-ui/react-select';
 
 const navItems = [
     {label: 'Home', href: "/"},
     {label: 'Companions', href: "/companions"},
     {label: 'My journey', href: "/my-journey"},
+    {Label: 'My Notes', href: "/notes"},
 ]
 
 const NavItems = () => {
@@ -26,7 +28,7 @@ const NavItems = () => {
                 <Link
                     href={href}
                     key={label}
-                    className={`${pathname === href ? 'text-primary font-semibold' : ''} flex items-center gap-2`}
+                    className={`${pathname === href ? 'text-primary font-semibold' : 'text-muted-foreground'} flex items-center gap-2`}
                     onClick={() => handleClick(href)}
                 >
                     {label}

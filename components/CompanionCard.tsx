@@ -3,6 +3,7 @@
 import { deleteCompanion } from "@/lib/actions/companion.actions";
 import { removeBookmark } from "@/lib/actions/companion.actions";
 import { addBookmark } from "@/lib/actions/companion.actions";
+import { Notebook } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -115,6 +116,19 @@ const CompanionCard = ({
         >
             Delete Companion
         </button>
+        <div className="flex justify-between items-center mt-4">
+            <Link href={`/companions/${id}`} className="...">
+                Chat
+            </Link>
+
+            <Link 
+                href={`/notes?subject=${subject}`} // Deep link to filtered notes!
+                className="text-xs text-gray-500 hover:text-indigo-600 flex items-center gap-1"
+            >
+                <Notebook size={14} />
+                View Notes
+            </Link>
+        </div>
         </article>
     );
 };

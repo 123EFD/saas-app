@@ -59,7 +59,7 @@ export default function NoteViewModal({
         }
     };
 
-    const subjects = ["General", "Maths", "Science", "Chemistry", "History", "Coding"];
+    const subjects = ["General", "Maths", "Science", "Chemistry", "History", "Coding","Language","Economics"];
 
     return(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>

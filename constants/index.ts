@@ -1,19 +1,25 @@
 export const subjects = [
+  "general",
   "maths",
   "language",
   "science",
   "history",
   "coding",
   "economics",
+  "chemistry"
 ];
 
+//"General", "Maths", "Science", "Chemistry", "History", "Coding","Language","Economics"
+
 export const subjectsColors = {
+  general: "#BDE7FF",
   science: "#E5D0FF",
   maths: "#FFDA6E",
   language: "#BDE7FF",
   coding: "#FFC8E4",
   history: "#FFECC8",
   economics: "#C8FFDF",
+  chemistry: "#FFD8B8",
 };
 
 export const voices = {
@@ -70,4 +76,5 @@ export const recentSessions = [
     duration: 10,
     color: "#C8FFDF",
   },
+  
 ];
