@@ -39,8 +39,8 @@ export default function NoteCard({note, onDelete, onBookmark, onClick}: NoteCard
                     }}
                     className={`p-1.5 rounded full transition-colors ${
                         note.bookmarked
-                            ? "text-yellow-500 bg-red-300 hover:bg-pink-300"
-                            : "text-indigo-400 hover:bg-red-400 hover:text-blue-400"
+                            ? "text-red-700 bg-red-300 hover:bg-pink-300"
+                            : "text-indigo-400 hover:bg-indigo-100 hover:text-blue-400"
                         }`}
                     >
                         {/*Fill icon if bookmarked*/}
@@ -49,12 +49,12 @@ export default function NoteCard({note, onDelete, onBookmark, onClick}: NoteCard
             </div>
 
             {/* Title & Preview */}
-            <h3 className="font-bold text-neutral-600 text-lg mb-2 truncate pr-4">
+            <h3 className="text-slate-600 dark:text-slate-600 text-sm line-clamp-3 flex-grow leading-relaxed">
                 {note.title}
             </h3>
 
-            <p className="text-shadow-blue-200 text-sm line-clamp-3 flex-grow leading-relaxed">
-                {note.content}
+            <p className="text-slate-600 dark:text-slate-700 text-sm line-clamp-3 flex-grow leading-relaxed">
+                {  note.content}
             </p>
 
             {/* FOOTER: Date & Delete */}

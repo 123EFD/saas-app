@@ -8,7 +8,7 @@ const navItems = [
     {label: 'Home', href: "/"},
     {label: 'Companions', href: "/companions"},
     {label: 'My journey', href: "/my-journey"},
-    {Label: 'My Notes', href: "/notes"},
+    {label: 'My Notes', href: "/notes"},
 ]
 
 const NavItems = () => {
@@ -21,13 +21,10 @@ const NavItems = () => {
         if (loadingHref && pathname === loadingHref) {
             setLoadingHref(null);
         }
-        if (loadingHref && pathname !== loadingHref) {
-            setLoadingHref(null);
-        }
     }, [pathname, loadingHref]);
 
     const handleClick = (href: string) => {
-        if (pathname === href) {
+        if (pathname !== href) {
             setLoadingHref(href);
         };
     };

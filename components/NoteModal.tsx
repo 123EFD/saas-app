@@ -9,9 +9,10 @@ interface NoteModalProps {
     isOpen:boolean;
     onClose: () => void;
     onSave: (data: CreateNoteParams) => Promise<void>; //wait for server
+    hideHeader?: boolean;
 }
 
-export default function NoteModal({isOpen, onClose, onSave} : NoteModalProps) {
+export default function NoteModal({isOpen, onClose, onSave, hideHeader} : NoteModalProps) {
     //initial state
     const [formData, setFormData] = useState<CreateNoteParams>({
         title: "",
@@ -45,7 +46,8 @@ export default function NoteModal({isOpen, onClose, onSave} : NoteModalProps) {
     return (
         //to close the modal
         <div className="fixed inset-0 z-50 flex items-center 
-        justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        onAbort={onClose}>
             
             {/*this one dont close*/}
             <div
@@ -55,12 +57,15 @@ export default function NoteModal({isOpen, onClose, onSave} : NoteModalProps) {
                 role="dialog"    
             >
                 {/*Header*/}
-                <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100"></div>
-                    <h2 className="text-xl font-bold text text-indigo-600">Create New Note</h2>
-                    <button type="button" onClick={onClose} aria-label="Close modal" className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
-                        <X size={20} />
-                    </button>
-                </div>
+                {!hideHeader && (
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+                        <h2 className="text-xl font-bold text-indigo-600">Create New Note</h2>
+                        <button type="button" onClick={onClose} aria-label="Close modal" className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+                            <X size={20} />
+                        </button>
+                    </div>
+                )}
+                
 
                 {/* FORM */}
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -74,7 +79,9 @@ export default function NoteModal({isOpen, onClose, onSave} : NoteModalProps) {
                                 value={formData.title}
                                 onChange={handleChange}
                                 placeholder="What's on your mind?"
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none
+                                bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                                placeholder:text-gray-500 dark:placeholder:text-gray-400"
                                 required
                             />
                         </div>
@@ -86,7 +93,8 @@ export default function NoteModal({isOpen, onClose, onSave} : NoteModalProps) {
                                 name="subject"
                                 value={formData.subject}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white cursor-pointer"
+                                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none
+                                        bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                             >
                                 <option value="General">General</option>
                                 <option value="Maths">Maths</option>
@@ -111,7 +119,9 @@ export default function NoteModal({isOpen, onClose, onSave} : NoteModalProps) {
                         value={formData.content}
                         onChange={handleChange}
                         placeholder="# Notes\n- Point 1\n- Point 2"
-                        className="w-full h-48 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none font-mono text-sm leading-relaxed"
+                        className="w-full h-48 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none font-mono text-sm leading-relaxed
+                         bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100
+                         placeholder:text-gray-500 dark:placeholder:text-gray-400"
                         required
                         />
                     </div>
@@ -137,6 +147,7 @@ export default function NoteModal({isOpen, onClose, onSave} : NoteModalProps) {
                     </div>
                 </form>
         </div>
+    </div>
     );
 }
 

@@ -113,7 +113,7 @@ export default function NoteViewModal({
                             <button
                                 onClick={handleSave}
                                 disabled={isSaving}
-                                className="flex items-center gap-2 px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"
+                                className="flex items-center gap-2 px-4 py-1.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors disabled:opacity-70"
                             >
                                 {isSaving ? <Save size={16} /> : <Check size={16} />}
                                 {isSaving ? "Saving..." : <> <Check size={16}></Check> Save Changes</>}
@@ -158,7 +158,7 @@ export default function NoteViewModal({
                     <textarea
                         value={editForm.content}
                         onChange={(e) => setEditForm({ ...editForm, content: e.target.value })}
-                        className="w-full h-full min-h-[300px] text-base leading-relaxed bg-white dark:bg-slate-900 text-gray-800 resize-none outline-none font-mono"
+                        className="w-full min-h-[300px] text-base leading-relaxed bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-100 resize-none outline-none font-mono"
                         placeholder="Start typing..."
                     />
                 ) : (

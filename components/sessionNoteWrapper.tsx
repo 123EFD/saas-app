@@ -23,7 +23,6 @@ export default function SessionNoteWrapper({ companionId, companionName, subject
             companion_id: companionId,
             subject: data.subject === "General" ? subject: data.subject
         });
-
     };
 
     return (
@@ -33,17 +32,16 @@ export default function SessionNoteWrapper({ companionId, companionName, subject
             onClick={() => setIsOpen(true)}
             className="fixed bottom-6 right-6 z-40 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105 active:scale-95 group"
             title="Take a note"
+            aria-label="Add Note"
         >
             <Plus size={24} />
-            <span className="absolute right-full mr-3 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity pointer-events-none">
-                Add Note
-            </span>
         </button>
 
         <NoteModal
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             onSave={handleSave}
+            hideHeader
         />
         </>
     );
