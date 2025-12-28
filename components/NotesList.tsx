@@ -5,10 +5,14 @@ import NoteCard from "./NoteCard";
 import { Ghost } from "lucide-react"; // npm install lucide-react
 
 interface NotesListProps {
-    notes: Note[];
+    notes: unknown;
     onOpenNote: (note: Note) => void;
     onDeleteNote: (id: number) => Promise<void>;
     onBookmarkNote: (id: number) => Promise<void>;
+}
+
+function isNoteArray(input: unknown): input is Note[] {
+    return Array.isArray(input);
 }
 
 export default function NotesList({ 
@@ -17,9 +21,9 @@ export default function NotesList({
     onDeleteNote, 
     onBookmarkNote 
 }: NotesListProps) {
-
+    const list: Note[] = isNoteArray(notes) ? notes : [];
     //handling empty state and show notifications if it is empty
-    if (!notes || notes.length === 0) {
+    if (list.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[400px] text-center border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50/50">
                 <div className="bg-white p-4 rounded-full shadow-sm mb-4">
@@ -36,7 +40,7 @@ export default function NotesList({
     //grid layout using CSS grid
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in fade-in duration-500">
-            {notes.map((note) => (
+            {list.map((note) => (
                 <NoteCard
                 key={note.id}           // React needs a unique key for list performance
                 note={note}             // Pass the data down

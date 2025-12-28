@@ -32,7 +32,17 @@ interface ProfileViewProps {
     companions: any[];
     sessionHistory: any[];
     bookmarkedCompanions: any[];
-    initialNotes: Note[];
+    initialNotes: unknown;
+}
+
+function toNoteArray(input: unknown): Note[] {
+    if (Array.isArray(input)) return input;
+    // common API shapes (adjust as needed)
+    // @ts-expect-error: runtime guards
+    if (Array.isArray(input?.items)) return input.items;
+    // @ts-expect-error: runtime guards
+    if (Array.isArray(input?.data)) return input.data;
+    return [];
 }
 
 export default function ProfileView({
@@ -42,7 +52,7 @@ export default function ProfileView({
     bookmarkedCompanions,
     initialNotes    
 } : ProfileViewProps) {
-    const [notes, setNotes] = useState<Note[]>(initialNotes); //array for objects
+    const [notes, setNotes] = useState<Note[]>(toNoteArray(initialNotes)); //array for objects
     const [selectedNote, setSelectedNote] = useState<Note | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
 

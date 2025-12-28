@@ -31,17 +31,19 @@ const SearchInput = () => {
                     router.push(newUrl, {scroll: false});
                 }
             }
-        },500)
+        },500);
+        return () => clearTimeout(delayDebounceFn);
     }, [searchQuery, router, searchParams, pathname]);
 
 return (
-    <div className='relative border border-black dark:border-white
+    <div className='relative border border-gray-300 dark:border-gray-700
                     rounded-lg items-center flex gap-2
                     px-2 py-1 h-fit bg-white dark:bg-gray-900'>
         <Image src="/icons/search.svg" alt="search" width={15} height={15}/>
         <input
             placeholder='Search companions...'
-            className='outline-none bg-transparent text-foreground'
+            className='outline-none bg-transparent  text-gray-900 dark:text-gray-100 placeholder:text-gray-400 
+            dark:placeholder:text-gray-500'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
         />
