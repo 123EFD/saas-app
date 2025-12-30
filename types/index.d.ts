@@ -5,6 +5,37 @@
 //   accountId: string;
 // };
 
+
+//Updated with Note types
+//Data model for Xano Databse Table
+export interface Note {
+  id:number;
+  user_id: string;
+  title:string;
+  content:string;
+  subject: string;
+  companion_id?: string;
+  bookmarked: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+//input model for creating note
+export interface CreateNoteParams {
+  title:string;
+  content:string;
+  subject:string;
+  companion_id?:string;
+}
+
+export interface GetNotesParams{
+  subject?:string;
+  search?:string;
+  bookmarked?:boolean;
+  page?:number;
+  limit?:number;
+}
+
 enum Subject {
   maths = "maths",
   language = "language",

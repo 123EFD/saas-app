@@ -1,32 +1,41 @@
 'use client';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
 const navItems = [
     {label: 'Home', href: "/"},
     {label: 'Companions', href: "/companions"},
     {label: 'My journey', href: "/my-journey"},
+    {label: 'My Notes', href: "/notes"},
 ]
 
 const NavItems = () => {
     const pathname = usePathname();
+    const router = useRouter();
     const [loadingHref, setLoadingHref] = useState<string | null>(null);
 
+    //sync loading state to actual route change
+    useEffect(() => {
+        if (loadingHref && pathname === loadingHref) {
+            setLoadingHref(null);
+        }
+    }, [pathname, loadingHref]);
+
     const handleClick = (href: string) => {
-        setLoadingHref(href);
-        // Reset loading state after 2 seconds (simulating navigation)
-        setTimeout(() => setLoadingHref(null), 2000);
+        if (pathname !== href) {
+            setLoadingHref(href);
+        };
     };
 
     return (
         <nav className="flex items-center gap-4">
-            {navItems.map(({ label, href}) =>(
+            {navItems.map(({label, href}) =>(
                 <Link
                     href={href}
-                    key={label}
-                    className={`${pathname === href ? 'text-primary font-semibold' : ''} flex items-center gap-2`}
+                    key={href}
+                    className={`${pathname === href ? 'text-primary font-semibold' : 'text-muted-foreground'} flex items-center gap-2`}
                     onClick={() => handleClick(href)}
                 >
                     {label}
