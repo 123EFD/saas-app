@@ -14,8 +14,6 @@ toggleBookmark(noteId)
 import { createXanoClient } from "@/lib/xano";
 import { revalidatePath } from "next/cache";
 import { Note, CreateNoteParams, GetNotesParams } from "@/types";
-import { tr } from "zod/v4/locales";
-import { coerce } from "zod";
 
 //sanity check preview for logging arbitrary payloads
 function safePreview(value: any, len = 800) : string {
