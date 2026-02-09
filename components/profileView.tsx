@@ -101,10 +101,11 @@ export default function ProfileView({
             <section className="flex justify-between gap-4 max-sm:flex-col items-center">
                 <div className="flex gap-4 items-center">
                     <Image
-                        src={user.imageUrl}
-                        alt={user.firstName!}
+                        src={user.imageUrl || "/icons/user.svg"}
+                        alt={user.firstName || "User"}
                         width={110}
                         height={110}
+                        className="rounded-full object-cover shadow-md"
                     />
                     <div className="flex flex-col gap-2">
                         <h1 className="font-bold text-2xl">
@@ -116,7 +117,7 @@ export default function ProfileView({
                     </div>
                 </div>
                 <div className="flex gap-4">
-                    <div className="border border-black rouded-lg p-3 gap-2 flex flex-col h-fit">
+                    <div className="border border-black rounded-lg p-3 gap-2 flex flex-col h-fit">
                         <div className="flex gap-2 items-center">
                             <Image
                                 src="/icons/check.svg"
@@ -128,7 +129,7 @@ export default function ProfileView({
                         </div>
                         <div>Lessons completed</div>
                     </div>
-                    <div className="border border-black rouded-lg p-3 gap-2 flex flex-col h-fit">
+                    <div className="border border-black rounded-lg p-3 gap-2 flex flex-col h-fit">
                         <div className="flex gap-2 items-center">
                             <Image src="/icons/cap.svg" alt="cap" width={22} height={22} />
                             <p className="text-2xl font-bold">{companions.length}</p>

@@ -21,7 +21,10 @@ export const createCompanion = async (formData: CreateCompanion) => {
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
     const supabase = createSupabaseClient();
     const { userId } = await auth();
-    let query = supabase.from('companions').select('*');
+
+    let query = supabase.from('companions').
+        select('*')
+        .eq('author', userId);
 
     if(subject && topic) {
         query = query.ilike('subject', `%${subject}%`)
@@ -175,7 +178,8 @@ export const addBookmark = async (companionId: string, path: string) => {
     const { error: deleteError } = await supabase
         .from("companions")
         .delete()
-        .eq("id", id);
+        .eq("id", id)
+        .eq("author", userId);
 
     if (deleteError) throw new Error(deleteError.message);
 

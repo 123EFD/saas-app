@@ -35,6 +35,7 @@ const Profile = async () => {
           id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
+          imageUrl: user.imageUrl,
           emailAddresses: user.emailAddresses.map(e => ({ emailAddress: e.emailAddress }))
         }}
         companions={companions}
@@ -45,14 +46,14 @@ const Profile = async () => {
     );
   } catch (error) {
     console.error("[Profile Page] Error loading data:", error);
-    // Return with empty/fallback data or specific error UI
-    // For now, return ProfileView with empty data to avoid crash
+    
     return (
       <ProfileView
         user={{
           id: user.id,
           firstName: user.firstName,
           lastName: user.lastName,
+          imageUrl : user.imageUrl,
           emailAddresses: user.emailAddresses.map(e => ({ emailAddress: e.emailAddress }))
         }}
         companions={[]}
