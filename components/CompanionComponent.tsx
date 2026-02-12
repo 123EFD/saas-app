@@ -7,6 +7,7 @@ import Image from "next/image";
 import Lottie, {LottieRefCurrentProps} from "lottie-react";
 import soundwaves from '@/constants/soundwaves.json'
 import { addToSessionHistory } from '@/lib/actions/companion.actions';
+import {Send} from 'lucide-react';
 
 enum CallStatus{
     INACTIVE = 'INACTIVE',
@@ -21,6 +22,7 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
         const [isSpeaking, setIsSpeaking] = useState(false);
         const [isMuted, setIsMuted] = useState(false)
         const [messages, setMessages] = useState<SavedMessage[]>([]);
+        const [textInput, setTextInput] = useState("");
 
         const lottieRef = useRef<LottieRefCurrentProps>(null);
 
@@ -97,6 +99,22 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
         vapi.stop()
     }
 
+    const handleSendMessage = async (e: React.FormEvent) => {
+                e.preventDefault();
+                if (!textInput.trim() || callStatus !== CallStatus.ACTIVE) return;
+                
+                vapi.send({
+                    type: 'add-message',
+                    message: {
+                        role: 'user',
+                        content: textInput,
+                    },
+                });
+
+                setMessages((prev) => [{role: 'user', content: textInput}, ...prev]);
+                setTextInput("");
+            };
+
     return (
         <section className="flex flex-col h-full">
             <section className="flex gap-8 max-sm:flex-col">
@@ -128,6 +146,27 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
                         height={90} className='rounded-lg'/>
                         <p className='font-bold text-2xl'>{userName}</p>
                     </div>
+                    {callStatus === CallStatus.ACTIVE && (
+                        <form
+                            onSubmit={handleSendMessage}
+                            className='flex items-center gap-2 bg-slate-700 w-full'>
+                                <input
+                                    type="text"
+                                    value={textInput}
+                                    onChange={(e) => setTextInput(e.target.value)}
+                                    placeholder='Type a message...'
+                                    className='bg-transparent flex-1 outline-none text-violet-300 text-sm px-2'/>
+                                    <button 
+                                        type='submit'
+                                        className='p-2 bg-cyan-500 hover:bg-cyan-200 rounded-lg transition-all active:scale-95'
+                                        disabled={!textInput.trim()}
+                                        title='Send message'
+                                        >
+                                            <Send size={16} className='text-violet-400'/>
+                                    </button>
+                            </form>
+                    
+                    )}
                     <button className='btn-mic' onClick={toggleMicrophone} disabled={callStatus !== CallStatus.ACTIVE}>
                         <Image src={isMuted ? '/icons/mic-off.svg' :
                             '/icons/mic-on.svg'} alt='mic' width={36} height={36}/>
