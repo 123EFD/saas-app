@@ -9,6 +9,24 @@ import soundwaves from '@/constants/soundwaves.json'
 import { addToSessionHistory } from '@/lib/actions/companion.actions';
 import {Send} from 'lucide-react';
 
+interface SavedMessage {
+    role: string;
+    content: string;
+}
+
+interface CompanionComponentProps {
+    companionId: string;
+    subject: string;
+    topic: string;
+    name: string;
+    userName: string;
+    userImage: string;
+    style: string;
+    voice: string;
+    messages: SavedMessage[];
+    setMessages: React.Dispatch<React.SetStateAction<SavedMessage[]>>;
+}
+
 enum CallStatus{
     INACTIVE = 'INACTIVE',
     CONNECTING='CONNECTING',
@@ -17,13 +35,11 @@ enum CallStatus{
 }
 
 const CompanionComponent = ({companionId, subject, topic, name, userName,
-    userImage, style, voice}: CompanionComponentProps) => {
+    userImage, style, voice, messages, setMessages}: CompanionComponentProps) => {
         const [callStatus, setCallStatus] = useState<CallStatus>(CallStatus.INACTIVE);
         const [isSpeaking, setIsSpeaking] = useState(false);
         const [isMuted, setIsMuted] = useState(false)
-        const [messages, setMessages] = useState<SavedMessage[]>([]);
         const [textInput, setTextInput] = useState("");
-
         const lottieRef = useRef<LottieRefCurrentProps>(null);
 
         useEffect(() => {
@@ -47,7 +63,7 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
             const onMessage = (message : Message) => {
                 if(message.type === 'transcript' && message.transcriptType === 'final'){
                     const newMessage =  {role: message.role, content: message.transcript}
-                    setMessages((prev) => [newMessage, ...prev])
+                    setMessages((prev: any) => [newMessage, ...prev])
                 }
             }
 
@@ -72,7 +88,7 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
                 vapi.off('speech-start', onSpeechStart);
                 vapi.off('speech-end', onSpeechEnd);
             }
-    }, []);
+    }, [setMessages]);
         
     const toggleMicrophone = () => {
         const isMuted = vapi.isMuted();
@@ -111,9 +127,23 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
                     },
                 });
 
-                setMessages((prev) => [{role: 'user', content: textInput}, ...prev]);
+                setMessages((prev: any) => [{role: 'user', content: textInput}, ...prev]);
                 setTextInput("");
             };
+
+    const renderMessage = (text: string) => {
+        const keywords = topic.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
+        return text.split(/\s+/).map((word, i) => {
+            const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+            const isKeyword = keywords.includes(cleanWord);
+            return (
+                <span key={i}>
+                    {isKeyword ? <strong className='font-extrabold'>{word}</strong> : word}
+                    {' '}
+                </span>
+            );
+        });
+    };
 
     return (
         <section className="flex flex-col h-full">
@@ -194,10 +224,8 @@ const CompanionComponent = ({companionId, subject, topic, name, userName,
                         return(
                             <p key={index} className='max-sm:text-sm'>
                             {
-                                name
-                                .split(' ')[0]
-                                .replace('/[.,]/g, ','')
-                            }: {message.content}
+                                name.split(' ')[0]
+                            }: {renderMessage(message.content)}
                             </p>
                         )
                     } else {
