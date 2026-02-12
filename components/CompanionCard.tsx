@@ -1,9 +1,10 @@
 "use client";
 
+import  { useState }  from "react";
 import { deleteCompanion } from "@/lib/actions/companion.actions";
 import { removeBookmark } from "@/lib/actions/companion.actions";
 import { addBookmark } from "@/lib/actions/companion.actions";
-import { Notebook } from "lucide-react";
+import { Notebook, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,6 +29,7 @@ const CompanionCard = ({
     bookmarked,
 }: CompanionCardProps) => {
     const pathname = usePathname();
+    const [isLaunching, setIsLaunching] = useState(false);
 
     // Function to determine if a color is dark or light
     const isDarkColor = (color: string) => {
@@ -62,11 +64,11 @@ const CompanionCard = ({
     if (!confirmDelete) return;
 
     try {
-      await deleteCompanion(id, pathname);
-      alert("Companion deleted successfully.");
+        await deleteCompanion(id, pathname);
+        alert("Companion deleted successfully.");
     } catch (error) {
-      console.error("Delete failed:", error);
-      alert("Failed to delete companion.");
+        console.error("Delete failed:", error);
+        alert("Failed to delete companion.");
     }
   };
 
@@ -106,8 +108,21 @@ const CompanionCard = ({
         </div>
 
         <Link href={`/companions/${id}`} className="w-full">
-            <button className={`btn-primary w-full justify-center ${isDarkBackground ? 'bg-white text-gray-900' : 'bg-gray-900 text-white'}`}>
-            Launch Lesson
+            <button 
+                disabled={isLaunching}
+                onClick={() => setIsLaunching(true)}
+                className={`btn-primary w-full justify-center ${isDarkBackground ? 
+                    'bg-white text-gray-900' : 'bg-gray-900 text-white'}
+                        ${isLaunching ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                    {isLaunching ? (
+                        <>
+                            <Loader2 className="h-4 w-4 animate-spin"/>
+                            <span>Launching...</span>
+                        </>
+                    ) : (
+                        "Launch Lesson"
+                    )}
             </button>
         </Link>
         <button
