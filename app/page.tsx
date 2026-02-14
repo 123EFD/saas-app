@@ -3,10 +3,13 @@ import CompanionsList from "@/components/CompanionsList";
 import CTA from "@/components/CTA";
 import {getAllCompanions, getRecentSessions} from "@/lib/actions/companion.actions";
 import {getSubjectColor} from "@/lib/utils";
+import { currentUser } from "@clerk/nextjs/server";
 
 const Page = async () => {
   const companions = await getAllCompanions({ limit:3 });
-  const recentSessionCompanions = await getRecentSessions(10);
+  const user = await currentUser();
+
+  const recentSessionCompanions = user ? await getRecentSessions(10, user.id) : [];
 
   return (
     <main>

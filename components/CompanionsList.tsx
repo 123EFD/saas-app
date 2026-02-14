@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Table,
   TableBody,
@@ -82,7 +81,7 @@ const CompanionsList = ({
                   {subject}
                 </div>
                 <div
-                  className="flex items-center ustify-center rounded-lg w-fit p-2 md:hidden"
+                  className="flex items-center justify-center rounded-lg w-fit p-2 md:hidden"
                   style={{ backgroundColor: getSubjectColor(subject) }}
                 >
                   <Image
