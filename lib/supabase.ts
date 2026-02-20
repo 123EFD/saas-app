@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { auth } from "@clerk/nextjs/server";
+import { getServerSupabaseToken } from "@/lib/server/auth";
 
 export const createSupabaseClient = async () => {
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -10,13 +10,7 @@ export const createSupabaseClient = async () => {
     }
 
     try {
-        const clerkAuth = await auth(); 
-        if (!clerkAuth || typeof clerkAuth.getToken !== "function") {
-            // No session object available
-            return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        }
-
-        const token = await clerkAuth.getToken({ template: "supabase" });
+        const token = await getServerSupabaseToken();
 
         if (!token || typeof token !== "string" || token.split(".").length !== 3) {
             //fall back to anon client

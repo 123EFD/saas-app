@@ -1,10 +1,10 @@
 import CompanionForm from '@/components/CompanionForm'
 import React from 'react'
-import { auth } from '@clerk/nextjs/server';
+import { getServerUserId } from '@/lib/server/auth'
 import { redirect } from 'next/navigation';
 
 const NewCompanion = async() => {
-  const { userId } = await auth();
+  const userId = getServerUserId();
   if(!userId) redirect('/sign-in');
 
 
