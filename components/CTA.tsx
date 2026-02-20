@@ -1,8 +1,18 @@
-import React from 'react'
+"use client";
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useState } from 'react';
+import { Loader2, Plus } from 'lucide-react';
 
 const CTA = () => {
+    const router = useRouter();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleBuildClick = () => {
+        setIsLoading(true);
+        router.push('/companions/new');
+    }
     return (
         <section className='cta-section'>
             <div className='cta-badge'>Start learning your way</div>
@@ -19,11 +29,17 @@ const CTA = () => {
                 width={362}
                 height={232}
                 />
-            <button className='btn-primary'>
-                <Image src="/icons/plus.svg" alt="plus icon"
-                    width={16} height={16} />
+            <button className='btn-primary'
+                onClick={handleBuildClick}
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                    <Plus className="h-4 w-4" />
+                )}
+                <span>{isLoading ? "Loading..." : "Build a New Companion"}</span>
                 <Link href="/companions/new">
-                    <p>Build a New Companion</p>
                 </Link>
             </button>
         </section>

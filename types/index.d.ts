@@ -64,6 +64,7 @@ interface CreateCompanion {
   voice: string;
   style: string;
   duration: number;
+  attachmentUrl?: string;
 }
 
 interface GetAllCompanions {
