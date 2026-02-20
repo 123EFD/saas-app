@@ -4,6 +4,7 @@ import {currentUser} from "@clerk/nextjs/server";
 import {redirect} from "next/navigation";
 import {getSubjectColor} from "@/lib/utils";
 import Image from "next/image";
+import CompanionComponent from "@/components/CompanionComponent";
 import CompanionClientWrapper from "@/components/CompanionClientWrapper"; 
 
 interface CompanionSessionPageProps {

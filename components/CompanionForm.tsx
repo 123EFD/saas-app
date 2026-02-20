@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -23,10 +24,7 @@ import {
 import { subjects } from "@/constants"
 import { Textarea } from "./ui/textarea"
 import { createCompanion } from "@/lib/actions/companion.actions"
-import React, { useState } from "react"
-import { Paperclip, X } from "lucide-react"
-import { useSession } from "@clerk/nextjs";
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation"
 
 const formSchema = z.object({
     name: z.string().min(1, {message: "Username must be at least 2 characters."}),
@@ -35,14 +33,10 @@ const formSchema = z.object({
     voice: z.string().min(1, {message: "Voice must be at least 2 characters."}),
     style: z.string().min(1, {message: "Style must be at least 2 characters."}),
     duration: z.coerce.number().min(1, {message: "Duration must be at least 2 characters."}),
-    attachmentUrl : z.string().optional(),
+    
 })
 
 const CompanionForm = () => {
-    const {session} = useSession();
-    const router = useRouter();
-    const [file, setFile] = useState<File | null>(null);
-    const [uploading, setUploading] = useState(false);
     // 1. Define your form.
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -53,59 +47,20 @@ const CompanionForm = () => {
             voice: "",
             style: "",
             duration: 15,
-            attachmentUrl: "",
         },
     })
 
-    const onUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const selectedFile = e.target.files?.[0];
-        if (selectedFile) setFile(selectedFile);
-    };
-
-    const uploadToServer = async (file: File) => {
-        const fd = new FormData();
-        fd.append("file", file);
-
-        const res = await fetch("/api/upload", {
-            method: "POST",
-            body: fd,
-        });
-
-        const json = await res.json();
-        if (!res.ok) {
-            console.error("Upload endpoint response:", json);
-            throw new Error(json?.error?.message || json?.error || "Upload failed");
-        }
-        return json.path as string;
-    };
-
-     // 2. Define a submit handler.
+  // 2. Define a submit handler.
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
-        setUploading(true);
-        try {
-            if (!session) {
-                throw new Error("You must be signed in to upload files.");
-            }
+        const companion = await createCompanion(values);
 
-            let attachmentUrl = "";
-            if (file) {
-                attachmentUrl = await uploadToServer(file);
-            }
-                
-            const companion = await createCompanion({...values, attachmentUrl});
-
-            if (companion) {
-                router.push(`/companions/${companion.id}`);
-            }
-        } catch (error:any) {
-            console.error("Failed to upload", error.message || error);
-            try { console.dir(error); } catch (e) {
-                console.error("Failed to log error", e);
-            }
-        } finally {
-            setUploading(false);
-        }
+        if(companion) {
+            redirect(`/companions/${companion.id}`);
+    }else {
+        console.log("Failed to create companion");
+        redirect('/');
     }
+}
 
     return (
         <Form {...form}>
@@ -168,24 +123,6 @@ const CompanionForm = () => {
                                     {...field}
                                     className="input" />
                             </FormControl>
-                            <div className="flex items-center gap-2">
-                                        <label className="flex items-center gap-2 cursor-pointer bg-secondary px-3 py-2 rounded-md hover:opacity-80 transition">
-                                            <Paperclip className="h-4 w-4"/>
-                                            <span className="text-sm">Upload PDF or Image</span>
-                                            <input 
-                                                type="file"
-                                                className="hidden"
-                                                accept=".pdf, .jpg, .jpeg, .png"
-                                                onChange={onUpload}
-                                                />
-                                        </label>
-                                        {file && (
-                                            <div className="flex items-center gap-1 text-sm text-indigo-400">
-                                                {file.name}
-                                                <X className="h-4 w-4 cursor-pointer" onClick={() => setFile(null)} />
-                                            </div>
-                                        )}
-                            </div>      
                             <FormMessage />
                         </FormItem>
                     )}
@@ -275,12 +212,7 @@ const CompanionForm = () => {
                         </FormItem>
                     )}
                 />
-                <Button 
-                    type="submit" 
-                    className="w-full cursor-pointer bg-indigo-500"
-                    >
-                        {uploading ? "Uploading..." : "Build Your Own Companion"}
-                </Button>
+                <Button type="submit" className="w-full cursor-pointer bg-indigo-500">Build Your Own Companion</Button>
             </form>
         </Form>
     )

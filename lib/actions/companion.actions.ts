@@ -3,85 +3,23 @@
 import {auth} from "@clerk/nextjs/server";
 import {createSupabaseClient} from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
-import { createServiceSupabaseClient } from "@/lib/supabase-service";
-import { processAndStoreEmbeddings } from "@/lib/actions/embeddings.actions";
 
 export const createCompanion = async (formData: CreateCompanion) => {
     const { userId: author } = await auth();
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
 
-    const payload = {
-        name: formData.name,
-        subject: formData.subject,
-        topic: formData.topic,
-        voice: formData.voice,
-        style: formData.style,
-        duration: formData.duration,
-        author,
-        attachment_url: formData.attachmentUrl ?? null
-    };
-
-    const { data: insertData, error : insertError } = await supabase
-        .from("companions")
-        .insert(payload)
+    const { data, error } = await supabase
+        .from('companions')
+        .insert({...formData, author })
         .select();
 
-    if (insertError) {
-        console.error("Companion insert error:", insertError);
-        throw new Error(`DB insert failed: ${JSON.stringify(insertError)}`);
-    }
+    if(error || !data) throw new Error(error?.message || 'Failed to create a companion');
 
-    const companion = insertData?.[0];
-
-    if (companion && companion.attachment_url) {
-        const attachment = companion.attachment_url as string;
-
-        if (attachment.toLowerCase().endsWith('.pdf')) {
-            try {
-                const serviceSupabase = createServiceSupabaseClient();
-                const { data: downloadData, error: downloadError } = await serviceSupabase
-                    .storage
-                    .from("attachments")
-                    .download(attachment);
-                
-                if (downloadError || !downloadData) {
-                    console.error("Failed to download attachment for parsing:", downloadError);
-                } else {
-                    const arrayBuffer = await downloadData.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-
-                    // Dynamically import pdf-parse to avoid loading it on the client
-                    const pdfParseModule = await import("pdf-parse");
-                    const pdfParse = (pdfParseModule as any).default ?? pdfParseModule;
-                    const parsed = await pdfParse(buffer);
-                    const text = parsed?.text ?? "";
-                    const {error: docInsertError } = await serviceSupabase
-                        .from("companion_documents")
-                        .insert({
-                            companion_id: companion.id,
-                            content: text
-                        });
-                    if (docInsertError) {
-                        console.error("Failed to insert document:", docInsertError);
-                    }
-
-                    try {
-                        await processAndStoreEmbeddings(companion.id, text);
-                    } catch (embErr) {
-                        console.error("Failed to process embeddings:", embErr);
-                    }
-                }
-            } catch (error) {
-                console.error("PDF parsing failed:", error);
-            }
-        }
-    }
-    
-    return companion;
+    return data[0];
 };
 
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     const { userId } = await auth();
 
     let query = supabase.from('companions').
@@ -128,7 +66,7 @@ export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }:
 
 };
 export const getCompanion = async (id: string) => {
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
 
     const { data, error } = await supabase
         .from('companions')
@@ -142,7 +80,7 @@ export const getCompanion = async (id: string) => {
 
 export const addToSessionHistory = async (companionId: string) => {
     const { userId } = await auth();
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase.from('session_history')
         .insert({
             companion_id: companionId,
@@ -155,7 +93,7 @@ export const addToSessionHistory = async (companionId: string) => {
 }
 
 export const getRecentSessions = async (limit = 10, userId?:string) => {
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     if (!userId) {
         return [];
     }
@@ -172,7 +110,7 @@ export const getRecentSessions = async (limit = 10, userId?:string) => {
 }
 
 export const getUserSessions = async (userId: string, limit = 10) => {
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase
         .from('session_history')
         .select(`companions:companion_id (*)`)
@@ -186,7 +124,7 @@ export const getUserSessions = async (userId: string, limit = 10) => {
 }
 
 export const getUserCompanions = async (userId: string) => {
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase
         .from('companions')
         .select()
@@ -205,7 +143,7 @@ export const getUserCompanions = async (userId: string) => {
 export const addBookmark = async (companionId: string, path: string) => {
     const { userId } = await auth();
     if (!userId) return;
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase.from("bookmarks").insert({
         companion_id: companionId,
         user_id: userId,
@@ -222,7 +160,7 @@ export const addBookmark = async (companionId: string, path: string) => {
     export const removeBookmark = async (companionId: string, path: string) => {
     const { userId } = await auth();
     if (!userId) return;
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase
         .from("bookmarks")
         .delete()
@@ -240,7 +178,7 @@ export const addBookmark = async (companionId: string, path: string) => {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
 
     // Delete the companion
     const { error: deleteError } = await supabase
@@ -258,7 +196,7 @@ export const addBookmark = async (companionId: string, path: string) => {
 
     // It's almost the same as getUserCompanions, but it's for the bookmarked companions
     export const getBookmarkedCompanions = async (userId: string) => {
-    const supabase = await createSupabaseClient();
+    const supabase = createSupabaseClient();
     const { data, error } = await supabase
         .from("bookmarks")
         .select(`companions:companion_id (*)`) // Notice the (*) to get all the companion data
