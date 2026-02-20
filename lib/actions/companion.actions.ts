@@ -1,4 +1,5 @@
 "use server";
+export const dynamic = 'force-dynamic';
 
 import { getServerUserId } from "@/lib/server/auth";
 import {createSupabaseClient} from "@/lib/supabase";

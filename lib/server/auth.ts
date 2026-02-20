@@ -1,4 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
+
+export const dynamic = 'force-dynamic';
 export async function getServerUserId(): Promise<string | null> {
     try {
         const a = await auth();
