@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import CompanionForm from '@/components/CompanionForm'
 import React from 'react'
 import { getServerUserId } from '@/lib/server/auth'
