@@ -13,18 +13,25 @@ POST   /notes (create)
 
 */
 
-import { getServerUserId, getServerSupabaseToken } from "@/lib/server/auth";
+import { auth } from "@clerk/nextjs/server";
+import { Rss } from "lucide-react";
 
 const XANO_API_URL = process.env.NEXT_PUBLIC_XANO_API_URL!;
 
 export async function createXanoClient() {
-    const userId = await getServerUserId();
+    const { userId, getToken } = await auth();
 
     if (!userId) {
-        throw new Error("User unauthorized: No Clerk user");
+        throw new Error("User unauthorized: No Clerk useer");
     }
 
-    const token = await getServerSupabaseToken();
+    //generate JWT
+    let token: string | null = null;
+    try {
+        token = await getToken();
+    } catch (error) {
+        token  = null;
+    }
 
     //helper function to wraps fetch command but pre-fills headers
     async function request<T = any>(endpoint:string, init: RequestInit = {}): Promise<T> {

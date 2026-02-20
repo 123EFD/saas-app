@@ -1,17 +1,13 @@
 "use server";
-export const dynamic = 'force-dynamic';
 
-import { getServerUserId } from "@/lib/server/auth";
+import {auth} from "@clerk/nextjs/server";
 import {createSupabaseClient} from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import { createServiceSupabaseClient } from "@/lib/supabase-service";
 import { processAndStoreEmbeddings } from "@/lib/actions/embeddings.actions";
-import { CreateCompanion } from "@/types";
-import { GetAllCompanions } from "@/types";
 
 export const createCompanion = async (formData: CreateCompanion) => {
-    const author = await getServerUserId();
-    if (!author) throw new Error("Unauthorized");
+    const { userId: author } = await auth();
     const supabase = await createSupabaseClient();
 
     const payload = {
@@ -86,10 +82,7 @@ export const createCompanion = async (formData: CreateCompanion) => {
 
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
     const supabase = await createSupabaseClient();
-    const  userId  = await getServerUserId();
-    if (!userId) {
-        throw new Error("Unauthorized");
-    }
+    const { userId } = await auth();
 
     let query = supabase.from('companions').
         select('*')
@@ -148,10 +141,7 @@ export const getCompanion = async (id: string) => {
 };
 
 export const addToSessionHistory = async (companionId: string) => {
-    const userId  = await getServerUserId();
-    if (!userId) {
-        throw new Error("Unauthorized");
-    }
+    const { userId } = await auth();
     const supabase = await createSupabaseClient();
     const { data, error } = await supabase.from('session_history')
         .insert({
@@ -213,7 +203,7 @@ export const getUserCompanions = async (userId: string) => {
 
 // Bookmarks
 export const addBookmark = async (companionId: string, path: string) => {
-    const userId = await getServerUserId();
+    const { userId } = await auth();
     if (!userId) return;
     const supabase = await createSupabaseClient();
     const { data, error } = await supabase.from("bookmarks").insert({
@@ -230,7 +220,7 @@ export const addBookmark = async (companionId: string, path: string) => {
     };
 
     export const removeBookmark = async (companionId: string, path: string) => {
-    const userId = await getServerUserId();
+    const { userId } = await auth();
     if (!userId) return;
     const supabase = await createSupabaseClient();
     const { data, error } = await supabase
@@ -247,7 +237,7 @@ export const addBookmark = async (companionId: string, path: string) => {
     };
 
     export const deleteCompanion = async (id: string, path?: string) => {
-    const userId = await getServerUserId();
+    const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
     const supabase = await createSupabaseClient();

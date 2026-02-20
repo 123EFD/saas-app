@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 
 import {getCompanion} from "@/lib/actions/companion.actions";
 import {currentUser} from "@clerk/nextjs/server";

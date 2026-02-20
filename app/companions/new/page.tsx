@@ -1,12 +1,10 @@
-export const dynamic = 'force-dynamic';
-
 import CompanionForm from '@/components/CompanionForm'
 import React from 'react'
-import { getServerUserId } from '@/lib/server/auth'
+import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 
 const NewCompanion = async() => {
-  const userId = getServerUserId();
+  const { userId } = await auth();
   if(!userId) redirect('/sign-in');
 
 

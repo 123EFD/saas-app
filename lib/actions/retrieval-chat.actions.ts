@@ -1,5 +1,5 @@
 "use server";
-export const dynamic = 'force-dynamic';
+
 import { retrieveRelevantChunks } from "@/lib/actions/embeddings.actions";
 import { createSupabaseClient } from "@/lib/supabase";
 // import OpenAI from "openai"; // uncomment if using OpenAI
