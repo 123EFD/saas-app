@@ -1,5 +1,4 @@
 "use server";
-export const dynamic = 'force-dynamic';
 
 import { getServerUserId } from "@/lib/server/auth";
 import {createSupabaseClient} from "@/lib/supabase";
@@ -87,13 +86,15 @@ export const createCompanion = async (formData: CreateCompanion) => {
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
     const supabase = await createSupabaseClient();
     const  userId  = await getServerUserId();
-    if (!userId) {
-        throw new Error("Unauthorized");
-    }
-
+    
     let query = supabase.from('companions').
         select('*')
-        .eq('author', userId);
+
+    if (userId) {
+        query = query.eq('author', userId);
+    } else {
+        query = query.eq('author', null); 
+    }
 
     if(subject && topic) {
         query = query.ilike('subject', `%${subject}%`)
@@ -108,7 +109,10 @@ export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }:
 
     const { data: companions, error } = await query;
 
-    if(error) throw new Error(error.message);
+    if(error) {
+        console.error("Supabase Query Error:", error.message);
+        return []; // Return empty list instead of crashing the whole page
+    }
     if(!companions) return [];
 
     // If user is not logged in, return companions with bookmarked: false
@@ -148,7 +152,7 @@ export const getCompanion = async (id: string) => {
 };
 
 export const addToSessionHistory = async (companionId: string) => {
-    const userId  = await getServerUserId();
+    const userId = await getServerUserId();
     if (!userId) {
         throw new Error("Unauthorized");
     }
@@ -199,14 +203,10 @@ export const getUserCompanions = async (userId: string) => {
     const supabase = await createSupabaseClient();
     const { data, error } = await supabase
         .from('companions')
-        .select()
+        .select('*')
         .eq('author', userId)
 
-    if(error) throw new Error(error.message);
-    const result = (data || [])
-        .filter((row:any) => row && row.companions)//remove null companions
-        .map(({companions } : any) => companions);
-    return result;
+    return data || [];
 };
 
 

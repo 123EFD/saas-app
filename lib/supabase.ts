@@ -1,7 +1,5 @@
-export const dynamic = 'force-dynamic';
 import { createClient } from '@supabase/supabase-js';
-import { getServerSupabaseToken } from "@/lib/server/auth";
-
+import { auth } from "@clerk/nextjs/server";
 export const createSupabaseClient = async () => {
     const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
     const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -11,9 +9,11 @@ export const createSupabaseClient = async () => {
     }
 
     try {
-        const token = await getServerSupabaseToken();
+        const { getToken } = await auth();
+        const token = await getToken({ template: "supabase" });
+        const isValidJwt = token && typeof token === "string" && token.split(".").length === 3;
 
-        if (!token || typeof token !== "string" || token.split(".").length !== 3) {
+        if (!isValidJwt) {
             //fall back to anon client
             return createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }

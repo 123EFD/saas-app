@@ -6,7 +6,7 @@ import { getServerUserId } from '@/lib/server/auth'
 import { redirect } from 'next/navigation';
 
 const NewCompanion = async() => {
-  const userId = getServerUserId();
+  const userId = await getServerUserId();
   if(!userId) redirect('/sign-in');
 
 
