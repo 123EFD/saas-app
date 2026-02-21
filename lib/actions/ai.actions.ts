@@ -1,6 +1,5 @@
 "use server";
 
-export const dynamic = "force-dynamic";
 import OpenAi from "openai";
 
 export async function generateChatSummary(messages: any[], companionName: string) {

@@ -1,6 +1,5 @@
 "use server";
 
-export const dynamic = "force-dynamic";
 /*
 
 backend calls CRUD

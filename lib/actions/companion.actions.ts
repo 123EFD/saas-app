@@ -89,7 +89,12 @@ export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }:
     
     let query = supabase.from('companions').
         select('*')
-        .eq('author', userId);
+
+    if (userId) {
+        query = query.eq('author', userId);
+    } else {
+        query = query.eq('author', null); 
+    }
 
     if(subject && topic) {
         query = query.ilike('subject', `%${subject}%`)
@@ -104,7 +109,10 @@ export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }:
 
     const { data: companions, error } = await query;
 
-    if(error) throw new Error(error.message);
+    if(error) {
+        console.error("Supabase Query Error:", error.message);
+        return []; // Return empty list instead of crashing the whole page
+    }
     if(!companions) return [];
 
     // If user is not logged in, return companions with bookmarked: false
@@ -195,14 +203,10 @@ export const getUserCompanions = async (userId: string) => {
     const supabase = await createSupabaseClient();
     const { data, error } = await supabase
         .from('companions')
-        .select()
+        .select('*')
         .eq('author', userId)
 
-    if(error) throw new Error(error.message);
-    const result = (data || [])
-        .filter((row:any) => row && row.companions)//remove null companions
-        .map(({companions } : any) => companions);
-    return result;
+    return data || [];
 };
 
 
