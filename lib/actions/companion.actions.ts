@@ -1,5 +1,4 @@
 "use server";
-export const dynamic = 'force-dynamic';
 
 import { getServerUserId } from "@/lib/server/auth";
 import {createSupabaseClient} from "@/lib/supabase";
@@ -87,10 +86,7 @@ export const createCompanion = async (formData: CreateCompanion) => {
 export const getAllCompanions = async ({ limit = 10, page = 1, subject, topic }: GetAllCompanions) => {
     const supabase = await createSupabaseClient();
     const  userId  = await getServerUserId();
-    if (!userId) {
-        throw new Error("Unauthorized");
-    }
-
+    
     let query = supabase.from('companions').
         select('*')
         .eq('author', userId);
@@ -148,7 +144,7 @@ export const getCompanion = async (id: string) => {
 };
 
 export const addToSessionHistory = async (companionId: string) => {
-    const userId  = await getServerUserId();
+    const userId = await getServerUserId();
     if (!userId) {
         throw new Error("Unauthorized");
     }
