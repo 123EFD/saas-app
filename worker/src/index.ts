@@ -8,7 +8,7 @@ inserts into companion_documents + companion_embeddings
 import http from "http";
 import { createClient } from "@supabase/supabase-js";
 
-import { processAndStoreEmbeddings } from "../../lib/actions/embeddings.actions";
+import { processAndStoreEmbeddings } from "lib/actions/embeddings.actions.ts";
 const SUPABASE_URL = (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 

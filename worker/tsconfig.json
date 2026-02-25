@@ -10,13 +10,11 @@
         "skipLibCheck": true,
         "resolveJsonModule": true,
         "baseUrl": "..",
-        "paths": {
-            "@/*": [
-                "./*"
-            ]
-        }
+        "paths": { "@/*": ["./*"] },
     },
-    "include": ["src/**/*.ts", "../lib/**/*.ts"],
+    "include": [
+        "src/**/*.ts"
+    ],
     "exclude": [
         "node_modules",
         "dist"
