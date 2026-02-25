@@ -35,3 +35,4 @@ export async function getHfEmbedding(text: string, model = "sentence-transformer
     const results = await getHfEmbeddingsBatch([text], model);
     return results[0];
 }
+

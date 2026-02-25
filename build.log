@@ -1,0 +1,18 @@
+
+> saas@0.1.0 build
+> next build
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ΓÜá `eslint` configuration in next.config.ts is no longer supported. See more info here: https://nextjs.org/docs/app/api-reference/cli/next#next-lint-options
+ ΓÜá Invalid next.config.ts options detected: 
+ ΓÜá     Unrecognized key(s) in object: 'eslint'
+ ΓÜá See more info here: https://nextjs.org/docs/messages/invalid-next-config
+
+> Build error occurred
+Error: EPERM: operation not permitted, unlink 'C:\Users\Chin Shi Er\OneDrive\Documents\Coding\saas\.next\server\app\notes'
+    at ignore-listed frames {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'unlink',
+  path: 'C:\\Users\\Chin Shi Er\\OneDrive\\Documents\\Coding\\saas\\.next\\server\\app\\notes'
+}

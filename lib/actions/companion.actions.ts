@@ -4,9 +4,12 @@ import { getServerUserId } from "@/lib/server/auth";
 import {createSupabaseClient} from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
 import { createServiceSupabaseClient } from "@/lib/supabase-service";
-import { processAndStoreEmbeddings } from "@/lib/actions/embeddings.actions";
 import { CreateCompanion } from "@/types";
 import { GetAllCompanions } from "@/types";
+
+/**
+ * createCompanion: create companion row and enqueue background job for PDF processing/embeddings
+ */
 
 export const createCompanion = async (formData: CreateCompanion) => {
     const author = await getServerUserId();
@@ -36,48 +39,29 @@ export const createCompanion = async (formData: CreateCompanion) => {
 
     const companion = insertData?.[0];
 
-    if (companion && companion.attachment_url) {
-        const attachment = companion.attachment_url as string;
-
-        if (attachment.toLowerCase().endsWith('.pdf')) {
+    if (companion && companion.attachment_url && companion.attachment_url.toLowerCase().endsWith(".pdf")) {
             try {
                 const serviceSupabase = createServiceSupabaseClient();
-                const { data: downloadData, error: downloadError } = await serviceSupabase
-                    .storage
-                    .from("attachments")
-                    .download(attachment);
-                
-                if (downloadError || !downloadData) {
-                    console.error("Failed to download attachment for parsing:", downloadError);
+                const { data: jobData, error: jobErr } = await serviceSupabase
+                .from("companion_jobs")
+                    .insert({
+                        companion_id: companion.id,
+                        state: "queued",
+                    })
+                    .select();
+
+                if (jobErr) {
+                    console.error("Failed to enqueue companion job:", jobErr);
                 } else {
-                    const arrayBuffer = await downloadData.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-
-                    // Dynamically import pdf-parse to avoid loading it on the client
-                    const pdfParseModule = await import("pdf-parse");
-                    const pdfParse = (pdfParseModule as any).default ?? pdfParseModule;
-                    const parsed = await pdfParse(buffer);
-                    const text = parsed?.text ?? "";
-                    const {error: docInsertError } = await serviceSupabase
-                        .from("companion_documents")
-                        .insert({
-                            companion_id: companion.id,
-                            content: text
-                        });
-                    if (docInsertError) {
-                        console.error("Failed to insert document:", docInsertError);
-                    }
-
-                    try {
-                        await processAndStoreEmbeddings(companion.id, text);
-                    } catch (embErr) {
-                        console.error("Failed to process embeddings:", embErr);
-                    }
+                    await serviceSupabase
+                        .from("companion_jobs")
+                        .update({embedding_status: "queued"})
+                        .eq("id", companion.id);
+                    
                 }
             } catch (error) {
                 console.error("PDF parsing failed:", error);
             }
-        }
     }
     
     return companion;
@@ -208,8 +192,6 @@ export const getUserCompanions = async (userId: string) => {
 
     return data || [];
 };
-
-
 
 // Bookmarks
 export const addBookmark = async (companionId: string, path: string) => {

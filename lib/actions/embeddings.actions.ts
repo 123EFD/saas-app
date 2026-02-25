@@ -4,7 +4,7 @@
  */
 // processAndStoreEmbeddings() and retrieveRelevantChunks()
 import { createServiceSupabaseClient } from "@/lib/supabase-service";
-import { chunkText } from "@/lib/chunker";
+import { chunkText } from "@/lib/text/chunker";
 import { getHfEmbeddingsBatch, getHfEmbedding } from "@/lib/embeddings/hf";
 
 export async function processAndStoreEmbeddings(
