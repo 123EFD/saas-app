@@ -54,8 +54,9 @@ export const createCompanion = async (formData: CreateCompanion) => {
                     const buffer = Buffer.from(arrayBuffer);
 
                     // Dynamically import pdf-parse to avoid loading it on the client
-                    const pdfParseModule = await import("pdf-parse");
-                    const pdfParse = (pdfParseModule as any).default ?? pdfParseModule;
+                    const { createRequire } = await import("module");
+                    const require = createRequire(import.meta.url);;
+                    const pdfParse = require("pdf-parse");
                     const parsed = await pdfParse(buffer);
                     const text = parsed?.text ?? "";
                     const {error: docInsertError } = await serviceSupabase
