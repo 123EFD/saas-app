@@ -3,8 +3,6 @@
 import { getServerUserId } from "@/lib/server/auth";
 import {createSupabaseClient} from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
-import { createServiceSupabaseClient } from "@/lib/supabase-service";
-import { processAndStoreEmbeddings } from "@/lib/actions/embeddings.actions";
 import { CreateCompanion } from "@/types";
 import { GetAllCompanions } from "@/types";
 
@@ -35,51 +33,6 @@ export const createCompanion = async (formData: CreateCompanion) => {
     }
 
     const companion = insertData?.[0];
-
-    if (companion && companion.attachment_url) {
-        const attachment = companion.attachment_url as string;
-
-        if (attachment.toLowerCase().endsWith('.pdf')) {
-            try {
-                const serviceSupabase = createServiceSupabaseClient();
-                const { data: downloadData, error: downloadError } = await serviceSupabase
-                    .storage
-                    .from("attachments")
-                    .download(attachment);
-                
-                if (downloadError || !downloadData) {
-                    console.error("Failed to download attachment for parsing:", downloadError);
-                } else {
-                    const arrayBuffer = await downloadData.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-
-                    // Dynamically import pdf-parse to avoid loading it on the client
-                    const { createRequire } = await import("module");
-                    const require = createRequire(import.meta.url);;
-                    const pdfParse = require("pdf-parse");
-                    const parsed = await pdfParse(buffer);
-                    const text = parsed?.text ?? "";
-                    const {error: docInsertError } = await serviceSupabase
-                        .from("companion_documents")
-                        .insert({
-                            companion_id: companion.id,
-                            content: text
-                        });
-                    if (docInsertError) {
-                        console.error("Failed to insert document:", docInsertError);
-                    }
-
-                    try {
-                        await processAndStoreEmbeddings(companion.id, text);
-                    } catch (embErr) {
-                        console.error("Failed to process embeddings:", embErr);
-                    }
-                }
-            } catch (error) {
-                console.error("PDF parsing failed:", error);
-            }
-        }
-    }
     
     return companion;
 };

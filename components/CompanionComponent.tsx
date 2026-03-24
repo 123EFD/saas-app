@@ -150,12 +150,20 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName,
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!textInput.trim() || callStatus !== CallStatus.ACTIVE) return;
+        if ((!textInput.trim() && !attachment) || callStatus !== CallStatus.ACTIVE || isUploading) return;
 
         let contextText = "";
         if (attachment) {
-            const content = await processChatAttachment(attachment.path, attachment.type);
-            contextText = `[File Attached: ${attachment.name}]\nContent/Description: ${content}\n\n`;
+            setIsUploading(true);
+
+            try {
+                const content = await processChatAttachment(attachment.path, attachment.type);
+                contextText = `[File Attached: ${attachment.name}]\nContent/Description: ${content}\n\n`;
+            } catch (err: any) {
+                contextText = `[File Attached: ${attachment.name}]\n[System Error: ${err.message}]\n\n`;
+            } finally {
+                setIsUploading(false);
+            }
         }
 
         const fullMessage = `${contextText}${textInput}`;
