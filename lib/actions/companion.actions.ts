@@ -155,15 +155,13 @@ export const getUserSessions = async (userId: string, limit = 10) => {
 
 export const getUserCompanions = async (userId: string) => {
     const supabase = await createSupabaseClient();
-    const { data, error } = await supabase
+    const { data } = await supabase
         .from('companions')
         .select('*')
         .eq('author', userId)
 
     return data || [];
 };
-
-
 
 // Bookmarks
 export const addBookmark = async (companionId: string, path: string) => {
@@ -184,58 +182,58 @@ export const addBookmark = async (companionId: string, path: string) => {
     };
 
     export const removeBookmark = async (companionId: string, path: string) => {
-    const userId = await getServerUserId();
-    if (!userId) return;
-    const supabase = await createSupabaseClient();
-    const { data, error } = await supabase
-        .from("bookmarks")
-        .delete()
-        .eq("companion_id", companionId)
-        .eq("user_id", userId);
-        
-    if (error) {
-        throw new Error(error.message);
-    }
-    revalidatePath(path);
-    return data;
+        const userId = await getServerUserId();
+        if (!userId) return;
+        const supabase = await createSupabaseClient();
+        const { data, error } = await supabase
+            .from("bookmarks")
+            .delete()
+            .eq("companion_id", companionId)
+            .eq("user_id", userId);
+            
+        if (error) {
+            throw new Error(error.message);
+        }
+        revalidatePath(path);
+        return data;
     };
 
     export const deleteCompanion = async (id: string, path?: string) => {
-    const userId = await getServerUserId();
-    if (!userId) throw new Error("Unauthorized");
+        const userId = await getServerUserId();
+        if (!userId) throw new Error("Unauthorized");
 
-    const supabase = await createSupabaseClient();
+        const supabase = await createSupabaseClient();
 
-    // Delete the companion
-    const { error: deleteError } = await supabase
-        .from("companions")
-        .delete()
-        .eq("id", id)
-        .eq("author", userId);
+        // Delete the companion
+        const { error: deleteError } = await supabase
+            .from("companions")
+            .delete()
+            .eq("id", id)
+            .eq("author", userId);
 
-    if (deleteError) throw new Error(deleteError.message);
+        if (deleteError) throw new Error(deleteError.message);
 
-    if (path) revalidatePath(path);
+        if (path) revalidatePath(path);
 
-    return { success: true };
+        return { success: true };
 };
 
     // It's almost the same as getUserCompanions, but it's for the bookmarked companions
     export const getBookmarkedCompanions = async (userId: string) => {
-    const supabase = await createSupabaseClient();
-    const { data, error } = await supabase
-        .from("bookmarks")
-        .select(`companions:companion_id (*)`) // Notice the (*) to get all the companion data
-        .eq("user_id", userId);
-    if (error) {
-        throw new Error(error.message);
-    };
-    // We don't need the bookmarks data, so we return only the companions
-    if (!data) return [];
+        const supabase = await createSupabaseClient();
+        const { data, error } = await supabase
+            .from("bookmarks")
+            .select(`companions:companion_id (*)`) // Notice the (*) to get all the companion data
+            .eq("user_id", userId);
+        if (error) {
+            throw new Error(error.message);
+        };
+        // We don't need the bookmarks data, so we return only the companions
+        if (!data) return [];
 
-    // Transform the data to include the bookmarked status
-    return data.map(({ companions }) => ({
-        ...companions,
-        bookmarked: true // Since these are from bookmarks, they're all bookmarked
-    }));
+        // Transform the data to include the bookmarked status
+        return data.map(({ companions }) => ({
+            ...companions,
+            bookmarked: true // Since these are from bookmarks, they're all bookmarked
+        }));
 }
