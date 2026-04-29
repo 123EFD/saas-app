@@ -13,6 +13,9 @@ const bricolage = Bricolage_Grotesque({
 export const metadata: Metadata = {
   title: "Converso",
   description: "Real-time AI Teaching Platform",
+  icons: {
+    icon: '/book.ico',
+  }
 };
 
 export default function RootLayout({

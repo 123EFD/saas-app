@@ -8,8 +8,7 @@ import Lottie, { LottieRefCurrentProps } from "lottie-react";
 import soundwaves from '@/constants/soundwaves.json'
 import { addToSessionHistory } from '@/lib/actions/companion.actions';
 import { Send } from 'lucide-react';
-import { Paperclip, X, Loader2 } from 'lucide-react';
-import { processChatAttachment } from '@/lib/actions/file-processing.actions';
+import TextareaAutosize from 'react-textarea-autosize';
 
 interface SavedMessage {
     role: string;
@@ -43,35 +42,6 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName,
     const [isMuted, setIsMuted] = useState(false)
     const [textInput, setTextInput] = useState("");
     const lottieRef = useRef<LottieRefCurrentProps>(null);
-    const [attachment, setAttachment] = useState<{ path: string, type: string, name: string } | null>(null);
-    const [isUploading, setIsUploading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setIsUploading(true);
-        try {
-            const formData = new FormData();
-            formData.append('file', file);
-            const res = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const result = await res.json();
-            if (result.path) {
-                setAttachment({ path: result.path, type: file.type, name: file.name });
-            }
-        } catch (error) {
-            console.error('Error uploading file:', error);
-        } finally {
-            setIsUploading(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = '';
-            }
-        };
-    };
-
 
 
     useEffect(() => {
@@ -93,7 +63,7 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName,
             addToSessionHistory(companionId)
         }
 
-        const onMessage = (message: Message) => {
+        const onMessage = (message: any) => {
             if (message.type === 'transcript' && message.transcriptType === 'final') {
                 const newMessage = { role: message.role, content: message.transcript }
                 setMessages((prev: any) => [newMessage, ...prev])
@@ -121,7 +91,7 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName,
             vapi.off('speech-start', onSpeechStart);
             vapi.off('speech-end', onSpeechEnd);
         }
-    }, [setMessages]);
+    }, [setMessages, companionId]);
 
     const toggleMicrophone = () => {
         const isMuted = vapi.isMuted();
@@ -150,34 +120,18 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName,
 
     const handleSendMessage = async (e: React.FormEvent) => {
         e.preventDefault();
-        if ((!textInput.trim() && !attachment) || callStatus !== CallStatus.ACTIVE || isUploading) return;
+        if (!textInput.trim() || callStatus !== CallStatus.ACTIVE) return;
 
-        let contextText = "";
-        if (attachment) {
-            setIsUploading(true);
-
-            try {
-                const content = await processChatAttachment(attachment.path, attachment.type);
-                contextText = `[File Attached: ${attachment.name}]\nContent/Description: ${content}\n\n`;
-            } catch (err: any) {
-                contextText = `[File Attached: ${attachment.name}]\n[System Error: ${err.message}]\n\n`;
-            } finally {
-                setIsUploading(false);
-            }
-        }
-
-        const fullMessage = `${contextText}${textInput}`;
         vapi.send({
             type: 'add-message',
             message: {
                 role: 'user',
-                content: fullMessage,
+                content: textInput,
             },
         });
 
-        setMessages((prev: any) => [{ role: 'user', content: fullMessage }, ...prev]);
+        setMessages((prev: any) => [{ role: 'user', content: textInput }, ...prev]);
         setTextInput("");
-        setAttachment(null);
     };
 
     const renderMessage = (text: string) => {
@@ -227,49 +181,31 @@ const CompanionComponent = ({ companionId, subject, topic, name, userName,
                     </div>
                     {callStatus === CallStatus.ACTIVE && (
                         <div className="flex flex-col gap-2 bg-slate-700 rounded-lg w-full p-2">
-                            {attachment && (
-                                <div className="flex items-center gap-2 bg-slate-600 px-2 py-1 rounded text-xs text-violet-200 w-fit">
-                                    <span className="truncate max-w-[150px]">
-                                        {attachment.name}
-                                    </span>
-                                    <button onClick={() => setAttachment(null)} className="hover:text-white">
-                                        <X size={14}/>
-                                    </button>
-                                </div>
-                            )}
                             <form
-                            onSubmit={handleSendMessage}
-                            className='flex items-center gap-2 bg-slate-700 w-full'>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={onFileChange}
-                                className='hidden'
-                                accept="application/pdf,image/*"
-                            />
-                                
-                            <button
-                                type='button'
-                                onClick={() => fileInputRef.current?.click()}
-                                className='p-2 text-slate-400 hover:text-cyan-400 transition-colors'
-                                disabled={isUploading}
-                                title='Send file'
-                            >
-                                {isUploading ? <Loader2 size={18} className='animate-spin'/>
-                                    : <Paperclip size={18} />}
-                            </button>
-
-                            <input
-                                type="text"
+                                onSubmit={handleSendMessage}
+                                className='flex items-center gap-2 bg-slate-700 w-full'>
+                            
+                            <TextareaAutosize
+                                minRows={1}
+                                maxRows={4} // Limits growth to 4 lines before scrolling
                                 value={textInput}
                                 onChange={(e) => setTextInput(e.target.value)}
+                                onKeyDown={(e) => {
+                                    // Submit on Enter (without Shift)
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        // Programmatically submit the form to trigger handleSendMessage
+                                        e.currentTarget.closest('form')?.requestSubmit();
+                                    }
+                                }}
                                 placeholder='Type a message...'
-                                className='bg-transparent flex-1 outline-none text-violet-300 text-sm px-2'
+                                className='bg-transparent flex-1 outline-none text-violet-300 text-sm px-2 resize-none py-2 no-scrollbar'
                             />
+
                             <button
                                 type='submit'
                                 className='p-2 bg-cyan-500 hover:bg-cyan-200 rounded-lg transition-all active:scale-95'
-                                disabled={(!textInput.trim() && !attachment) || isUploading}
+                                disabled={!textInput.trim()}
                                 title='Send message'
                             >
                                 <Send size={16} className='text-violet-400'/>

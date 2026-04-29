@@ -19,7 +19,6 @@ export const createCompanion = async (formData: CreateCompanion) => {
         style: formData.style,
         duration: formData.duration,
         author,
-        attachment_url: formData.attachmentUrl ?? null
     };
 
     const { data: insertData, error : insertError } = await supabase
