@@ -1,0 +1,35 @@
+================================================================================
+[ 🧊 AI Study Suite Logo ]                           [ 🔔 Alerts ] [ 👤 User Profile ]
+================================================================================
+
+👋 Welcome back, [User Name]! 
+Here is your academic intelligence overview.
+
+--------------------------------------------------------------------------------
+📊 THE KNOWLEDGE VAULT (Aggregated Analytics Ribbon)
+--------------------------------------------------------------------------------
+  [ 📚 PDFs Analyzed ]        [ 📝 Active Notes ]        [ 🧠 AI Interactions ]
+  [       14         ]        [       32        ]        [        1,204       ]
+  [  +2 this week    ]        [  Synced (Xano)  ]        [  Across all apps   ]
+
+--------------------------------------------------------------------------------
+🚀 LAUNCHPAD (The Core Applications)
+--------------------------------------------------------------------------------
++-----------------------------------+  +-----------------------------------+
+| 🎙️ Voice Note & Companion         |  | 📑 PDF Deep-Dive Workspace        |
+|-----------------------------------|  |-----------------------------------|
+| Record live lectures, take        |  | Upload massive textbooks, extract |
+| semantic notes, and chat with     |  | table data, and predict academic  |
+| your AI study companion.          |  | risks using vector search.        |
+|                                   |  |                                   |
+| [ Launch Voice Workspace ➔ ]      |  | [ Open PDF Engine (New Tab) ➔ ]   |
++-----------------------------------+  +-----------------------------------+
+
+--------------------------------------------------------------------------------
+⚡ RECENT INSIGHTS & ACTIVITY (Optional / Future Expansion)
+--------------------------------------------------------------------------------
+* ⚠️ Alert: AI predicts high risk in "Computer System Architecture".
+* ✅ Processed: "biology_chapter_4_syllabus.pdf" is ready for chat.
+* 🎙️ New Note: "Machine Learning Lecture 3" saved securely.
+
+================================================================================
