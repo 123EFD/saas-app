@@ -3,8 +3,6 @@
 import { getServerUserId } from "@/lib/server/auth";
 import {createSupabaseClient} from "@/lib/supabase";
 import { revalidatePath } from "next/cache";
-import { createServiceSupabaseClient } from "@/lib/supabase-service";
-import { processAndStoreEmbeddings } from "@/lib/actions/embeddings.actions";
 import { CreateCompanion } from "@/types";
 import { GetAllCompanions } from "@/types";
 
@@ -21,7 +19,6 @@ export const createCompanion = async (formData: CreateCompanion) => {
         style: formData.style,
         duration: formData.duration,
         author,
-        attachment_url: formData.attachmentUrl ?? null
     };
 
     const { data: insertData, error : insertError } = await supabase
@@ -35,50 +32,6 @@ export const createCompanion = async (formData: CreateCompanion) => {
     }
 
     const companion = insertData?.[0];
-
-    if (companion && companion.attachment_url) {
-        const attachment = companion.attachment_url as string;
-
-        if (attachment.toLowerCase().endsWith('.pdf')) {
-            try {
-                const serviceSupabase = createServiceSupabaseClient();
-                const { data: downloadData, error: downloadError } = await serviceSupabase
-                    .storage
-                    .from("attachments")
-                    .download(attachment);
-                
-                if (downloadError || !downloadData) {
-                    console.error("Failed to download attachment for parsing:", downloadError);
-                } else {
-                    const arrayBuffer = await downloadData.arrayBuffer();
-                    const buffer = Buffer.from(arrayBuffer);
-
-                    // Dynamically import pdf-parse to avoid loading it on the client
-                    const pdfParseModule = await import("pdf-parse");
-                    const pdfParse = (pdfParseModule as any).default ?? pdfParseModule;
-                    const parsed = await pdfParse(buffer);
-                    const text = parsed?.text ?? "";
-                    const {error: docInsertError } = await serviceSupabase
-                        .from("companion_documents")
-                        .insert({
-                            companion_id: companion.id,
-                            content: text
-                        });
-                    if (docInsertError) {
-                        console.error("Failed to insert document:", docInsertError);
-                    }
-
-                    try {
-                        await processAndStoreEmbeddings(companion.id, text);
-                    } catch (embErr) {
-                        console.error("Failed to process embeddings:", embErr);
-                    }
-                }
-            } catch (error) {
-                console.error("PDF parsing failed:", error);
-            }
-        }
-    }
     
     return companion;
 };
@@ -201,15 +154,13 @@ export const getUserSessions = async (userId: string, limit = 10) => {
 
 export const getUserCompanions = async (userId: string) => {
     const supabase = await createSupabaseClient();
-    const { data, error } = await supabase
+    const { data } = await supabase
         .from('companions')
         .select('*')
         .eq('author', userId)
 
     return data || [];
 };
-
-
 
 // Bookmarks
 export const addBookmark = async (companionId: string, path: string) => {
@@ -230,58 +181,58 @@ export const addBookmark = async (companionId: string, path: string) => {
     };
 
     export const removeBookmark = async (companionId: string, path: string) => {
-    const userId = await getServerUserId();
-    if (!userId) return;
-    const supabase = await createSupabaseClient();
-    const { data, error } = await supabase
-        .from("bookmarks")
-        .delete()
-        .eq("companion_id", companionId)
-        .eq("user_id", userId);
-        
-    if (error) {
-        throw new Error(error.message);
-    }
-    revalidatePath(path);
-    return data;
+        const userId = await getServerUserId();
+        if (!userId) return;
+        const supabase = await createSupabaseClient();
+        const { data, error } = await supabase
+            .from("bookmarks")
+            .delete()
+            .eq("companion_id", companionId)
+            .eq("user_id", userId);
+            
+        if (error) {
+            throw new Error(error.message);
+        }
+        revalidatePath(path);
+        return data;
     };
 
     export const deleteCompanion = async (id: string, path?: string) => {
-    const userId = await getServerUserId();
-    if (!userId) throw new Error("Unauthorized");
+        const userId = await getServerUserId();
+        if (!userId) throw new Error("Unauthorized");
 
-    const supabase = await createSupabaseClient();
+        const supabase = await createSupabaseClient();
 
-    // Delete the companion
-    const { error: deleteError } = await supabase
-        .from("companions")
-        .delete()
-        .eq("id", id)
-        .eq("author", userId);
+        // Delete the companion
+        const { error: deleteError } = await supabase
+            .from("companions")
+            .delete()
+            .eq("id", id)
+            .eq("author", userId);
 
-    if (deleteError) throw new Error(deleteError.message);
+        if (deleteError) throw new Error(deleteError.message);
 
-    if (path) revalidatePath(path);
+        if (path) revalidatePath(path);
 
-    return { success: true };
+        return { success: true };
 };
 
     // It's almost the same as getUserCompanions, but it's for the bookmarked companions
     export const getBookmarkedCompanions = async (userId: string) => {
-    const supabase = await createSupabaseClient();
-    const { data, error } = await supabase
-        .from("bookmarks")
-        .select(`companions:companion_id (*)`) // Notice the (*) to get all the companion data
-        .eq("user_id", userId);
-    if (error) {
-        throw new Error(error.message);
-    };
-    // We don't need the bookmarks data, so we return only the companions
-    if (!data) return [];
+        const supabase = await createSupabaseClient();
+        const { data, error } = await supabase
+            .from("bookmarks")
+            .select(`companions:companion_id (*)`) // Notice the (*) to get all the companion data
+            .eq("user_id", userId);
+        if (error) {
+            throw new Error(error.message);
+        };
+        // We don't need the bookmarks data, so we return only the companions
+        if (!data) return [];
 
-    // Transform the data to include the bookmarked status
-    return data.map(({ companions }) => ({
-        ...companions,
-        bookmarked: true // Since these are from bookmarks, they're all bookmarked
-    }));
+        // Transform the data to include the bookmarked status
+        return data.map(({ companions }) => ({
+            ...companions,
+            bookmarked: true // Since these are from bookmarks, they're all bookmarked
+        }));
 }

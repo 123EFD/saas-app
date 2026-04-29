@@ -10,7 +10,7 @@ const Navbar = () => {
         <Link  href="/">
             <div className="flex items-center gap-2.5 cursor-pointer">
                 <Image
-                    src="/images/book.svg"
+                    src="images/book.svg"
                     alt="logo"
                     width={46}
                     height={44}
