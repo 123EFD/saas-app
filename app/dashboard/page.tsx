@@ -3,6 +3,8 @@ import Link from "next/link";
 import { auth } from "@clerk/nextjs/server"; 
 import { Card, CardContent, CardHeader,CardDescription , CardTitle } from "@/components/ui/card";
 import { DashboardChart } from "@/components/DashboardChart";
+import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from 'next/navigation';
 
 async function getNeonData() {
     try {
@@ -55,10 +57,9 @@ async function getXanoData(userId: string) {
 export default async function DashBoard() {
     //update data based on user logged in
     const {userId } = await auth();
+    const user = await currentUser();
 
-    if (!userId) {
-        return <div>Please sign in to view your dashboard.</div>
-    }
+    if (!userId) redirect("/sign-in");
 
     const [neonData, xanoData] = await Promise.all([
         getNeonData(),
