@@ -1,5 +1,6 @@
 //analytic dashboard for both recommender(flutter) and saas (react)
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server"; 
 
 async function getNeonData() {
     try {
@@ -17,25 +18,32 @@ async function getNeonData() {
         if (!res.ok) throw new Error('Failed to fetch data');
 
         return res.json();
+        
     } catch (error) {
         console.error('Error fetching Neon data:', error);
         return { total_pdfs: 0, total_ai_interactions: 0, total_active_notes: 0 };
     }
 }
 
-async function getXanoData() {
+async function getXanoData(userId: string) {
     try {
-        const res = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:g_TkL_bT/get_study_notes', {
+        const { userId } = await auth();
+        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:g_TkL_bT/get_study_notes?user_id=${userId}`, {
             next: { revalidate: 60 }
     });
 
-        if (!res.ok) throw new Error('Failed to fetch data');
+        if (!res.ok){
+            console.warn(`⚠️ Xano rejected the request: ${res.status} ${res.statusText}`);
+            return { total_notes: 0 }; 
+        }
 
         const notes = await res.json();
 
+        //the response for Xano is object not a list
         return {
-            total_notes: notes.length ||0
+            total_notes: notes.items.length ||0
         };
+
     } catch (error) {
         console.error('Error fetching Xano data:', error);
         return { total_notes: 0 };
@@ -43,15 +51,22 @@ async function getXanoData() {
 }
 
 export default async function DashBoard() {
+    //update data based on user logged in
+    const {userId } = await auth();
+
+    if (!userId) {
+        return <div>Please sign in to view your dashboard.</div>
+    }
+
     const [neonData, xanoData] = await Promise.all([
         getNeonData(),
-        getXanoData(),
+        getXanoData(userId),
     ]);
 
     return (
         //Data visualization section
-        <div className="min-h-screen bg-gray-400 p-8">
-            <section className="max-w-6xl mx-auto bg-white rounded-2xl p-8 mb-12 shadow-sm">
+        <div className="min-h-screen bg-gray-100 p-8">
+            <section className="max-w-6xl mx-auto text-gray-900 bg-white rounded-2xl p-8 mb-12 shadow-sm">
                 <h3 className="text-xl font-bold mb-6 border-b pb-4">Study Statistics</h3>
 
                 {/* The SINGLE grid container for all 3 cards */}
