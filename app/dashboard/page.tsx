@@ -1,5 +1,8 @@
 //analytic dashboard for both recommender(flutter) and saas (react)
 import Link from "next/link";
+import { auth } from "@clerk/nextjs/server"; 
+import { Card, CardContent, CardHeader,CardDescription , CardTitle } from "@/components/ui/card";
+import { DashboardChart } from "@/components/DashboardChart";
 
 async function getNeonData() {
     try {
@@ -17,25 +20,32 @@ async function getNeonData() {
         if (!res.ok) throw new Error('Failed to fetch data');
 
         return res.json();
+        
     } catch (error) {
         console.error('Error fetching Neon data:', error);
         return { total_pdfs: 0, total_ai_interactions: 0, total_active_notes: 0 };
     }
 }
 
-async function getXanoData() {
+async function getXanoData(userId: string) {
     try {
-        const res = await fetch('https://x8ki-letl-twmt.n7.xano.io/api:g_TkL_bT/get_study_notes', {
+        const { userId } = await auth();
+        const res = await fetch(`https://x8ki-letl-twmt.n7.xano.io/api:g_TkL_bT/get_study_notes?user_id=${userId}`, {
             next: { revalidate: 60 }
     });
 
-        if (!res.ok) throw new Error('Failed to fetch data');
+        if (!res.ok){
+            console.warn(`⚠️ Xano rejected the request: ${res.status} ${res.statusText}`);
+            return { total_notes: 0 }; 
+        }
 
         const notes = await res.json();
 
+        //the response for Xano is object not a list
         return {
-            total_notes: notes.length ||0
+            total_notes: notes.items.length ||0
         };
+
     } catch (error) {
         console.error('Error fetching Xano data:', error);
         return { total_notes: 0 };
@@ -43,64 +53,97 @@ async function getXanoData() {
 }
 
 export default async function DashBoard() {
+    //update data based on user logged in
+    const {userId } = await auth();
+
+    if (!userId) {
+        return <div>Please sign in to view your dashboard.</div>
+    }
+
     const [neonData, xanoData] = await Promise.all([
         getNeonData(),
-        getXanoData(),
+        getXanoData(userId),
     ]);
 
-    return (
-        //Data visualization section
-        <div className="min-h-screen bg-gray-400 p-8">
-            <section className="max-w-6xl mx-auto bg-white rounded-2xl p-8 mb-12 shadow-sm">
-                <h3 className="text-xl font-bold mb-6 border-b pb-4">Study Statistics</h3>
-
-                {/* The SINGLE grid container for all 3 cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    {/* Card 1: PDFs Analyzed */}
-                    <div className="p-6 bg-blue-50 rounded-xl text-center">
-                        <p className="text-sm text-blue-600 font-bold uppercase">PDFs Analyzed</p>
-                        {/* Injecting the data fetched from your Python API! */}
-                        <p className="text-4xl font-black text-blue-900 mt-2">{neonData.total_pdfs}</p>
-                    </div>
-
-                    {/* Build Card 2 (Active Notes)*/}
-                    <div className="p-6 bg-pink-50 rounded-xl text-center">
-                        <p className="text-sm text-pink-300 font-bold uppercase">Active Notes</p>
-                        {/* Injecting the data fetched from your Python API! */}
-                        <p className="text-4xl font-black text-pink-900 mt-2">{xanoData.total_notes}</p>
-                    </div>
-
-                    {/* Card 3: AI Interactions */}
-                    <div className="p-6 bg-purple-50 rounded-xl text-center">
-                        <p className="text-sm text-purple-600 font-bold uppercase">AI Interactions</p>
-                        <p className="text-4xl font-black text-purple-900 mt-2">{neonData.total_ai_interactions}</p>
-                    </div>
-
+return (
+        // Using Shadcn semantic variables for perfect dark/light mode
+        <div className="min-h-screen bg-background text-foreground p-8">
+            <div className="max-w-6xl mx-auto space-y-8">
+                
+                <div>
+                    <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+                    <p className="text-muted-foreground">Welcome back! Here is an overview of your study metrics.</p>
                 </div>
 
-                {/*
-                Navigation cards for both internal(React SaaS) and external(Flutter Recommender App) apps
-                <Link href="..."> : click and lad new pages without blank reloading 
-                <a> tag with target="_blank" : open new tab, while dashboard open in the background
-                */}
-                <main className="mt-12 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* KPI Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <Card className="bg-blue-50/50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/50 shadow-none">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">PDFs Analyzed</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-4xl font-black text-blue-950 dark:text-blue-50">{neonData.total_pdfs}</div>
+                        </CardContent>
+                    </Card>
 
-                    {/* Internal React App: Use <Link> */}
-                    <Link href="https://saas-pi-inky-49.vercel.app" className="group p-8 bg-white border rounded-2xl hover:shadow-lg transition-all">
-                        <div className="text-4xl mb-4">📝</div>
-                        <h2 className="text-2xl font-bold group-hover:text-blue-300">AI Voice Assistant Notes</h2>
-                        <p className="text-gray-600">Access your synced study materials...</p>
-                    </Link>
+                    <Card className="bg-pink-50/50 dark:bg-pink-900/10 border-pink-100 dark:border-pink-900/50 shadow-none">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-bold text-pink-500 dark:text-pink-400 uppercase tracking-wider">Active Notes</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-4xl font-black text-pink-950 dark:text-pink-50">{xanoData.total_notes}</div>
+                        </CardContent>
+                    </Card>
 
-                    {/* External Flutter App: Use <a> tag */}
-                    <a href="https://recommender-api-ten.vercel.app" target="_blank" rel="noopener noreferrer" className="group p-8 bg-white border rounded-2xl hover:shadow-lg transition-all">
-                        <div className="text-4xl mb-4">📚</div>
-                        <h2 className="text-2xl font-bold group-hover:text-amber-300">Study Material Recommender & PDF Analyzer Workspace</h2>
-                        <p className="text-gray-600">Upload massive textbooks,articles,pdfs...</p>
-                    </a>
+                    <Card className="bg-purple-50/50 dark:bg-purple-900/10 border-purple-100 dark:border-purple-900/50 shadow-none">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-sm font-bold text-purple-600 dark:text-purple-400 uppercase tracking-wider">AI Interactions</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-4xl font-black text-purple-950 dark:text-purple-50">{neonData.total_ai_interactions}</div>
+                        </CardContent>
+                    </Card>
+                </div>
 
-                </main>
-            </section>
+                {/* Data Visualization Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
+                    <Card className="col-span-1 lg:col-span-4 shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Activity Overview</CardTitle>
+                            <CardDescription>Your AI interactions and notes created over the last 7 days.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="pl-2">
+                            <DashboardChart />
+                        </CardContent>
+                    </Card>
+
+                    {/* Navigation Cards combined into a quick-links menu */}
+                    <Card className="col-span-1 lg:col-span-3 shadow-sm">
+                        <CardHeader>
+                            <CardTitle>Workspaces</CardTitle>
+                            <CardDescription>Jump back into your study sessions.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-4">
+                            <Link href="https://saas-pi-inky-49.vercel.app" className="group flex items-center gap-4 p-4 rounded-xl border bg-card hover:bg-muted/50 transition-all">
+                                <div className="text-3xl">📝</div>
+                                <div>
+                                    <h3 className="font-semibold group-hover:text-primary transition-colors">AI Voice Notes</h3>
+                                    <p className="text-sm text-muted-foreground">Access synced study materials</p>
+                                </div>
+                            </Link>
+
+                            <a href="https://recommender-api-ten.vercel.app" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 p-4 rounded-xl border bg-card hover:bg-muted/50 transition-all">
+                                <div className="text-3xl">📚</div>
+                                <div>
+                                    <h3 className="font-semibold group-hover:text-primary transition-colors">PDF Analyzer</h3>
+                                    <p className="text-sm text-muted-foreground">Upload and parse textbooks</p>
+                                </div>
+                            </a>
+                        </CardContent>
+                    </Card>
+                </div>
+
+            </div>
         </div>
     );
 }
